@@ -1,0 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --p:            #E8A4BB;
+  --p-deep:       #C4728F;
+  --p-light:      #F5D0DF;
+  --p-ultra:      #FDF0F5;
+  --p-dark:       #3D1F2B;
+  --p-mid:        #6B2D45;
+  --p-muted:      #B07A90;
+  --p-border:     rgba(232, 164, 187, 0.30);
+  --p-avail-bg:   #FBF3F6;
+  --p-unavail-bg: #F2C8D6;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Jost', sans-serif;
+  background-color: var(--p-ultra);
+  color: var(--p-dark);
+}
