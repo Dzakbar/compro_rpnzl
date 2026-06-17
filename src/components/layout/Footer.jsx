@@ -1,5 +1,5 @@
 // src/components/layout/Footer.jsx
-const navLinks  = ['Home', 'About', 'Services', 'Gallery', 'Booking'];
+const navLinks  = ['Home', 'About', 'Gallery', 'Booking'];
 const contacts  = ['Instagram', 'WhatsApp', 'Email', 'TikTok'];
 
 export default function Footer() {

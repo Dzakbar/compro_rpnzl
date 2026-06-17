@@ -2,7 +2,7 @@
 import { NavLink } from 'react-router-dom';
 import Button from '../ui/Button';
 
-const navItems = ['Home', 'About', 'Services', 'Gallery', 'Booking', 'Contact'];
+const navItems = ['Home', 'About', 'Gallery', 'Booking'];
 
 export default function Navbar() {
   return (

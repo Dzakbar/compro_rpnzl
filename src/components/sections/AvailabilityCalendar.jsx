@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { FiCalendar, FiChevronLeft, FiChevronRight, FiClock } from 'react-icons/fi';
 
 const monthNames = [
@@ -199,6 +199,10 @@ function getAvailability(date) {
   };
 }
 
+function isBookableAvailability(info) {
+  return ['available', 'limited'].includes(info.status) && info.slots.length > 0;
+}
+
 function formatSelectedDate(date) {
   return `${fullDayNames[date.getDay()]}, ${date.getDate()} ${monthNames[date.getMonth()]} ${date.getFullYear()}`;
 }
@@ -214,8 +218,9 @@ function getPeriodTitle(viewMode, anchorDate) {
   return `${monthNames[anchorDate.getMonth()]} ${anchorDate.getFullYear()}`;
 }
 
-export default function AvailabilityCalendar({ className = '' }) {
+export default function AvailabilityCalendar({ className = '', bookingMode = false, compact = false, onSelectDate }) {
   const today = useMemo(() => normalizeDate(new Date()), []);
+  const onSelectDateRef = useRef(onSelectDate);
   const [viewMode, setViewMode] = useState('month');
   const [anchorDate, setAnchorDate] = useState(today);
   const [selectedDate, setSelectedDate] = useState(today);
@@ -235,6 +240,26 @@ export default function AvailabilityCalendar({ className = '' }) {
 
   const selectedInfo = getAvailability(selectedDate);
   const selectedStyle = statusStyles[selectedInfo.status];
+
+  useEffect(() => {
+    onSelectDateRef.current = onSelectDate;
+  }, [onSelectDate]);
+
+  useEffect(() => {
+    if (!onSelectDateRef.current) {
+      return;
+    }
+
+    const info = getAvailability(selectedDate);
+
+    onSelectDateRef.current({
+      date: selectedDate,
+      dateKey: formatDateKey(selectedDate),
+      dateLabel: formatSelectedDate(selectedDate),
+      availability: info,
+      isBookable: isBookableAvailability(info),
+    });
+  }, [selectedDate]);
 
   const movePeriod = (direction) => {
     const nextDate = viewMode === 'week'
@@ -269,7 +294,9 @@ export default function AvailabilityCalendar({ className = '' }) {
 
   return (
     <div className={`overflow-hidden rounded-[8px] border border-[var(--p-border)] bg-white shadow-sm ${className}`}>
-      <div className="flex flex-col gap-4 border-b border-[var(--p-border)] p-4 md:flex-row md:items-center md:justify-between">
+      <div className={`flex flex-col gap-4 border-b border-[var(--p-border)] p-4 ${
+        compact ? '' : 'md:flex-row md:items-center md:justify-between'
+      }`}>
         <div className="flex min-w-0 items-center gap-3">
           <div className="flex items-center gap-1">
             <button
@@ -305,26 +332,28 @@ export default function AvailabilityCalendar({ className = '' }) {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="inline-flex h-10 overflow-hidden rounded-[6px] border border-[var(--p-border)] bg-[var(--p-ultra)] p-1">
-            {[
-              ['week', 'Minggu'],
-              ['month', 'Bulan'],
-            ].map(([mode, label]) => (
-              <button
-                key={mode}
-                type="button"
-                onClick={() => changeViewMode(mode)}
-                className={`rounded-[4px] px-3 text-[11px] font-medium uppercase tracking-[1px] transition ${
-                  viewMode === mode
-                    ? 'bg-white text-[var(--p-mid)] shadow-sm'
-                    : 'text-[var(--p-muted)] hover:text-[var(--p-mid)]'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+        <div className={`flex flex-wrap items-center gap-2 ${compact ? 'hidden' : ''}`}>
+          {!compact && (
+            <div className="inline-flex h-10 overflow-hidden rounded-[6px] border border-[var(--p-border)] bg-[var(--p-ultra)] p-1">
+              {[
+                ['week', 'Minggu'],
+                ['month', 'Bulan'],
+              ].map(([mode, label]) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => changeViewMode(mode)}
+                  className={`rounded-[4px] px-3 text-[11px] font-medium uppercase tracking-[1px] transition ${
+                    viewMode === mode
+                      ? 'bg-white text-[var(--p-mid)] shadow-sm'
+                      : 'text-[var(--p-muted)] hover:text-[var(--p-mid)]'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
 
           <select
             value={anchorDate.getMonth()}
@@ -362,7 +391,7 @@ export default function AvailabilityCalendar({ className = '' }) {
         </div>
       </div>
 
-      <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_280px]">
+      <div className={`grid gap-0 ${compact ? '' : 'lg:grid-cols-[minmax(0,1fr)_280px]'}`}>
         <div className="p-4">
           {viewMode === 'month' ? (
             <>
@@ -380,16 +409,24 @@ export default function AvailabilityCalendar({ className = '' }) {
                   const isSelected = isSameDate(date, selectedDate);
                   const isToday = isSameDate(date, today);
                   const isCurrentMonth = date.getMonth() === anchorDate.getMonth();
+                  const isLocked = bookingMode && !isBookableAvailability(info);
 
                   return (
                     <button
                       key={formatDateKey(date)}
                       type="button"
-                      onClick={() => setSelectedDate(date)}
-                      className={`min-h-[54px] rounded-[6px] border p-1.5 text-left transition focus:outline-none focus:ring-2 focus:ring-[var(--p)] sm:min-h-[92px] sm:p-2 ${
+                      onClick={() => {
+                        if (!isLocked) {
+                          setSelectedDate(date);
+                        }
+                      }}
+                      disabled={isLocked}
+                      className={`${compact ? 'min-h-[48px] p-1 sm:min-h-[62px]' : 'min-h-[54px] p-1.5 sm:min-h-[92px] sm:p-2'} rounded-[6px] border text-left transition focus:outline-none focus:ring-2 focus:ring-[var(--p)] ${
                         style.cell
                       } ${isCurrentMonth ? '' : 'opacity-45'} ${
                         isSelected ? 'ring-2 ring-[var(--p)]' : ''
+                      } ${
+                        isLocked ? 'cursor-not-allowed opacity-50 hover:border-[var(--p-border)]' : ''
                       }`}
                     >
                       <div className="flex items-center justify-between gap-1">
@@ -402,7 +439,7 @@ export default function AvailabilityCalendar({ className = '' }) {
                         </span>
                         <span className={`h-2 w-2 shrink-0 rounded-full ${style.dot}`} />
                       </div>
-                      <div className="mt-2 hidden min-h-[32px] sm:block">
+                      <div className={`${compact ? 'hidden' : 'mt-2 hidden min-h-[32px] sm:block'}`}>
                         <p className="truncate text-[11px] font-medium text-[var(--p-dark)]">{info.label}</p>
                         <p className="mt-0.5 truncate text-[10px] text-[var(--p-muted)]">
                           {info.slots[0] || info.note}
@@ -420,15 +457,23 @@ export default function AvailabilityCalendar({ className = '' }) {
                 const style = statusStyles[info.status];
                 const isSelected = isSameDate(date, selectedDate);
                 const isToday = isSameDate(date, today);
+                const isLocked = bookingMode && !isBookableAvailability(info);
 
                 return (
                   <button
                     key={formatDateKey(date)}
                     type="button"
-                    onClick={() => setSelectedDate(date)}
+                    onClick={() => {
+                      if (!isLocked) {
+                        setSelectedDate(date);
+                      }
+                    }}
+                    disabled={isLocked}
                     className={`min-h-[168px] rounded-[6px] border p-3 text-left transition focus:outline-none focus:ring-2 focus:ring-[var(--p)] ${
                       style.cell
-                    } ${isSelected ? 'ring-2 ring-[var(--p)]' : ''}`}
+                    } ${isSelected ? 'ring-2 ring-[var(--p)]' : ''} ${
+                      isLocked ? 'cursor-not-allowed opacity-50 hover:border-[var(--p-border)]' : ''
+                    }`}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div>
@@ -461,43 +506,45 @@ export default function AvailabilityCalendar({ className = '' }) {
           )}
         </div>
 
-        <aside className="border-t border-[var(--p-border)] bg-[var(--p-ultra)] p-4 lg:border-l lg:border-t-0">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-[10px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
-                Detail jadwal
-              </p>
-              <h4 className="mt-1 font-serif text-[24px] font-light leading-tight text-[var(--p-mid)]">
-                {formatSelectedDate(selectedDate)}
-              </h4>
-            </div>
-            <span className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-medium ${selectedStyle.badge}`}>
-              {selectedInfo.label}
-            </span>
-          </div>
-
-          <p className="mt-3 text-[12px] leading-relaxed text-[var(--p-muted)]">
-            {selectedInfo.note}
-          </p>
-
-          <div className="mt-5 space-y-2">
-            {selectedInfo.slots.length > 0 ? (
-              selectedInfo.slots.map((slot) => (
-                <div
-                  key={slot}
-                  className="flex items-center gap-2 rounded-[6px] border border-[var(--p-border)] bg-white px-3 py-2 text-[12px] text-[var(--p-dark)]"
-                >
-                  <FiClock className="shrink-0 text-[var(--p)]" size={14} />
-                  <span>{slot}</span>
-                </div>
-              ))
-            ) : (
-              <div className="rounded-[6px] border border-dashed border-[var(--p-border)] bg-white px-3 py-3 text-[12px] text-[var(--p-muted)]">
-                Belum ada slot tersedia.
+        {!compact && (
+          <aside className="border-t border-[var(--p-border)] bg-[var(--p-ultra)] p-4 lg:border-l lg:border-t-0">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[10px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
+                  Detail jadwal
+                </p>
+                <h4 className="mt-1 font-serif text-[24px] font-light leading-tight text-[var(--p-mid)]">
+                  {formatSelectedDate(selectedDate)}
+                </h4>
               </div>
-            )}
-          </div>
-        </aside>
+              <span className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-medium ${selectedStyle.badge}`}>
+                {selectedInfo.label}
+              </span>
+            </div>
+
+            <p className="mt-3 text-[12px] leading-relaxed text-[var(--p-muted)]">
+              {selectedInfo.note}
+            </p>
+
+            <div className="mt-5 space-y-2">
+              {selectedInfo.slots.length > 0 ? (
+                selectedInfo.slots.map((slot) => (
+                  <div
+                    key={slot}
+                    className="flex items-center gap-2 rounded-[6px] border border-[var(--p-border)] bg-white px-3 py-2 text-[12px] text-[var(--p-dark)]"
+                  >
+                    <FiClock className="shrink-0 text-[var(--p)]" size={14} />
+                    <span>{slot}</span>
+                  </div>
+                ))
+              ) : (
+                <div className="rounded-[6px] border border-dashed border-[var(--p-border)] bg-white px-3 py-3 text-[12px] text-[var(--p-muted)]">
+                  Belum ada slot tersedia.
+                </div>
+              )}
+            </div>
+          </aside>
+        )}
       </div>
     </div>
   );

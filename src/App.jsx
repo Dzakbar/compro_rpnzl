@@ -8,10 +8,9 @@ import PageTransition from './components/layout/PageTransition';
 
 import Home     from './pages/Home';
 import About    from './pages/About';
-import Services from './pages/Services';
 import Gallery  from './pages/Gallery';
 import Booking  from './pages/Booking';
-import Contact  from './pages/Contact';
+import AdminDashboard from './pages/AdminDashboard';
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -21,10 +20,9 @@ function AnimatedRoutes() {
       <Routes location={location} key={location.pathname}>
         <Route path="/"          element={<PageTransition><Home /></PageTransition>} />
         <Route path="/about"     element={<PageTransition><About /></PageTransition>} />
-        <Route path="/services"  element={<PageTransition><Services /></PageTransition>} />
         <Route path="/gallery"   element={<PageTransition><Gallery /></PageTransition>} />
         <Route path="/booking"   element={<PageTransition><Booking /></PageTransition>} />
-        <Route path="/contact"   element={<PageTransition><Contact /></PageTransition>} />
+        <Route path="/admin"     element={<PageTransition><AdminDashboard /></PageTransition>} />
       </Routes>
     </AnimatePresence>
   );

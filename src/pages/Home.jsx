@@ -11,8 +11,8 @@ export default function Home() {
     <main>
       <Hero />
       <ServicesSection />
-      <CalendarSection />
       <GallerySection />
+      <CalendarSection />
       <TestimoniSection />
       <CtaSection />
     </main>

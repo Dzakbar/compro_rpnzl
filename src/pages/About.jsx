@@ -2,7 +2,7 @@
 export default function About() {
   return (
     <main className="min-h-screen bg-[var(--p-ultra)]">
-      <section className="px-6 pb-8 pt-24 text-center">
+      <section className="bg-[#f8f6f0] px-6 pb-8 pt-24 text-center">
         <p className="mb-3 text-sm font-medium uppercase tracking-wide2 text-[var(--p-muted)]">
           Tentang Kami
         </p>
