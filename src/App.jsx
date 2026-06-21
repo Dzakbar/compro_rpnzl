@@ -21,6 +21,7 @@ function AnimatedRoutes() {
         <Route path="/"          element={<PageTransition><Home /></PageTransition>} />
         <Route path="/about"     element={<PageTransition><About /></PageTransition>} />
         <Route path="/gallery"   element={<PageTransition><Gallery /></PageTransition>} />
+        <Route path="/gallery/:categorySlug" element={<PageTransition><Gallery /></PageTransition>} />
         <Route path="/booking"   element={<PageTransition><Booking /></PageTransition>} />
         <Route path="/admin"     element={<PageTransition><AdminDashboard /></PageTransition>} />
       </Routes>

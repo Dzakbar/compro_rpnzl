@@ -1,6 +1,7 @@
 export const hennaCategories = [
   {
     id: 'gold',
+    slug: 'gold',
     name: 'Gold Henna',
     tone: 'Warm shimmer',
     price: 'Mulai dari Rp 450.000',
@@ -12,10 +13,11 @@ export const hennaCategories = [
   },
   {
     id: 'marron',
-    name: 'Marron Henna',
+    slug: 'marron',
+    name: 'Maroon Henna',
     tone: 'Deep romantic',
     price: 'Mulai dari Rp 380.000',
-    shortDescription: 'Warna marron yang lebih tegas untuk motif elegan dan klasik.',
+    shortDescription: 'Warna maroon yang lebih tegas untuk motif elegan dan klasik.',
     description:
       'Cocok untuk pengantin yang ingin hasil lebih bold, hangat, dan tetap terlihat anggun di foto.',
     color: '#7b2f3c',
@@ -23,6 +25,7 @@ export const hennaCategories = [
   },
   {
     id: 'nude',
+    slug: 'nude',
     name: 'Nude Henna',
     tone: 'Soft natural',
     price: 'Mulai dari Rp 320.000',
@@ -35,5 +38,17 @@ export const hennaCategories = [
 ];
 
 export function getHennaCategory(categoryId) {
-  return hennaCategories.find((category) => category.id === categoryId) || hennaCategories[0];
+  const normalizedCategoryId = categoryId?.toLowerCase();
+
+  return (
+    hennaCategories.find(
+      (category) =>
+        category.id === normalizedCategoryId ||
+        category.slug === normalizedCategoryId
+    ) || hennaCategories[0]
+  );
+}
+
+export function getHennaCategorySlug(category) {
+  return category.slug || category.id;
 }
