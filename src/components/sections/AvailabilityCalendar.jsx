@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FiCalendar, FiChevronLeft, FiChevronRight, FiClock } from 'react-icons/fi';
+import { getApiBaseUrl } from '../../lib/apiBaseUrl';
 
 const monthNames = [
   'Januari',
@@ -19,7 +20,7 @@ const monthNames = [
 const weekDayNames = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
 const fullDayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+const API_BASE_URL = getApiBaseUrl();
 
 const statusStyles = {
   available: {

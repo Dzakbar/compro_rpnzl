@@ -6,8 +6,9 @@ import { FiCalendar, FiLock, FiMail, FiStar, FiX } from 'react-icons/fi';
 import { useSearchParams } from 'react-router-dom';
 import AvailabilityCalendar from '../components/sections/AvailabilityCalendar';
 import { getCompanyProfileCategory, useCompanyProfile } from '../hooks/useCompanyProfile';
+import { getApiBaseUrl } from '../lib/apiBaseUrl';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+const API_BASE_URL = getApiBaseUrl();
 
 const emptyForm = {
   name: '',

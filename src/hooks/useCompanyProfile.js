@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { hennaCategories } from '../data/hennaCategories';
+import { getApiBaseUrl } from '../lib/apiBaseUrl';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+const API_BASE_URL = getApiBaseUrl();
 const API_ENDPOINT = `${API_BASE_URL}/api/company-profile`;
 
 const defaultContents = {

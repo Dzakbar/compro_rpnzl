@@ -5,8 +5,9 @@ import { FiLogOut, FiClock, FiCheck, FiX } from 'react-icons/fi';
 import { useAuth } from '../hooks/useAuth';
 import BookingCard from '../components/sections/BookingCard';
 import SectionTitle from '../components/ui/SectionTitle';
+import { getApiBaseUrl } from '../lib/apiBaseUrl';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+const API_BASE_URL = getApiBaseUrl();
 
 export default function UserDashboard() {
   const navigate = useNavigate();
