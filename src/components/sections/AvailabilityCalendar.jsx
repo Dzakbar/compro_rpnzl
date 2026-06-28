@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FiCalendar, FiChevronLeft, FiChevronRight, FiClock } from 'react-icons/fi';
 
 const monthNames = [
@@ -19,74 +19,7 @@ const monthNames = [
 const weekDayNames = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
 const fullDayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
-const dummyAvailability = {
-  '2026-06-14': {
-    status: 'limited',
-    label: 'Terbatas',
-    note: 'Trial design',
-    slots: ['13:00', '16:00'],
-  },
-  '2026-06-15': {
-    status: 'booked',
-    label: 'Penuh',
-    note: 'Bridal henna',
-    slots: ['09:00', '13:00'],
-  },
-  '2026-06-17': {
-    status: 'available',
-    label: 'Tersedia',
-    note: 'Studio session',
-    slots: ['10:00', '13:00', '16:00'],
-  },
-  '2026-06-20': {
-    status: 'booked',
-    label: 'Penuh',
-    note: 'Wedding event',
-    slots: ['Full day'],
-  },
-  '2026-06-23': {
-    status: 'limited',
-    label: 'Terbatas',
-    note: 'Party henna',
-    slots: ['15:30'],
-  },
-  '2026-06-26': {
-    status: 'available',
-    label: 'Tersedia',
-    note: 'Home service',
-    slots: ['11:00', '14:00', '17:00'],
-  },
-  '2026-06-28': {
-    status: 'off',
-    label: 'Libur',
-    note: 'Studio tutup',
-    slots: [],
-  },
-  '2026-07-02': {
-    status: 'available',
-    label: 'Tersedia',
-    note: 'Bridal trial',
-    slots: ['10:00', '12:30', '15:00'],
-  },
-  '2026-07-04': {
-    status: 'booked',
-    label: 'Penuh',
-    note: 'Event booth',
-    slots: ['Full day'],
-  },
-  '2026-07-08': {
-    status: 'limited',
-    label: 'Terbatas',
-    note: 'Last slot',
-    slots: ['16:30'],
-  },
-  '2026-07-12': {
-    status: 'off',
-    label: 'Libur',
-    note: 'Maintenance',
-    slots: [],
-  },
-};
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 const statusStyles = {
   available: {
@@ -166,41 +99,11 @@ function isSameDate(a, b) {
   );
 }
 
-function getAvailability(date) {
-  const dummy = dummyAvailability[formatDateKey(date)];
-
-  if (dummy) {
-    return dummy;
-  }
-
-  if (date.getDay() === 0) {
-    return {
-      status: 'off',
-      label: 'Libur',
-      note: 'Studio tutup',
-      slots: [],
-    };
-  }
-
-  if (date.getDay() === 6) {
-    return {
-      status: 'limited',
-      label: 'Terbatas',
-      note: 'Weekend slot',
-      slots: ['11:00', '15:30'],
-    };
-  }
-
-  return {
-    status: 'available',
-    label: 'Tersedia',
-    note: 'Regular session',
-    slots: ['10:00', '13:00', '16:00'],
-  };
-}
-
 function isBookableAvailability(info) {
-  return ['available', 'limited'].includes(info.status) && info.slots.length > 0;
+  return Boolean(
+    info?.isBookable ??
+    (['available', 'limited'].includes(info?.status) && info?.slots?.some((slot) => slot.bookable !== false))
+  );
 }
 
 function formatSelectedDate(date) {
@@ -218,12 +121,97 @@ function getPeriodTitle(viewMode, anchorDate) {
   return `${monthNames[anchorDate.getMonth()]} ${anchorDate.getFullYear()}`;
 }
 
+function getMonthCacheKey(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function mergeMonthCaches(days, cache) {
+  return days.reduce((dates, day) => {
+    const cacheKey = getMonthCacheKey(day);
+
+    return {
+      ...dates,
+      ...(cache[cacheKey] || {}),
+    };
+  }, {});
+}
+
+function normalizeBackendStatus(status) {
+  if (status === 'fully_booked') return 'booked';
+  if (status === 'blocked') return 'off';
+  return status || 'off';
+}
+
+function getStatusLabel(status) {
+  const normalized = normalizeBackendStatus(status);
+
+  return {
+    available: 'Tersedia',
+    limited: 'Terbatas',
+    booked: 'Penuh',
+    off: 'Tidak tersedia',
+  }[normalized] || 'Tidak tersedia';
+}
+
+function normalizeSlot(slot) {
+  const time = slot.time || slot.booking_time;
+
+  return {
+    id: slot.id,
+    time,
+    status: normalizeBackendStatus(slot.status),
+    label: getStatusLabel(slot.status),
+    bookable: Boolean(slot.bookable),
+    remainingSlots: slot.remaining_slots ?? 0,
+    bookingCount: slot.booking_count ?? 0,
+    notes: slot.notes || '',
+  };
+}
+
+function normalizeAvailabilityDate(item) {
+  const slots = (item.slots || []).map(normalizeSlot);
+  const bookableSlots = slots.filter((slot) => slot.bookable);
+
+  return {
+    date: item.date,
+    status: normalizeBackendStatus(item.status),
+    label: getStatusLabel(item.status),
+    note: item.notes || (
+      bookableSlots.length > 0
+        ? `${bookableSlots.length} slot bisa dipilih`
+        : 'Tidak ada slot tersedia'
+    ),
+    slots,
+    isBookable: Boolean(item.bookable) && bookableSlots.length > 0,
+  };
+}
+
+function getEmptyAvailability() {
+  return {
+    status: 'off',
+    label: 'Tidak tersedia',
+    note: 'Belum dibuka owner',
+    slots: [],
+    isBookable: false,
+  };
+}
+
+function slotLabel(slot) {
+  if (!slot) return '';
+  if (typeof slot === 'string') return slot;
+
+  return slot.remainingSlots > 0
+    ? `${slot.time} (${slot.remainingSlots} tersisa)`
+    : slot.time;
+}
+
 export default function AvailabilityCalendar({ className = '', bookingMode = false, compact = false, onSelectDate }) {
   const today = useMemo(() => normalizeDate(new Date()), []);
   const onSelectDateRef = useRef(onSelectDate);
   const [viewMode, setViewMode] = useState('month');
   const [anchorDate, setAnchorDate] = useState(today);
   const [selectedDate, setSelectedDate] = useState(today);
+  const [availabilityByMonth, setAvailabilityByMonth] = useState({});
 
   const visibleDays = useMemo(() => {
     if (viewMode === 'week') {
@@ -238,19 +226,80 @@ export default function AvailabilityCalendar({ className = '', bookingMode = fal
     return Array.from({ length: 5 }, (_, index) => currentYear - 1 + index);
   }, [anchorDate]);
 
-  const selectedInfo = getAvailability(selectedDate);
-  const selectedStyle = statusStyles[selectedInfo.status];
+  const availabilityByDate = useMemo(
+    () => mergeMonthCaches(visibleDays, availabilityByMonth),
+    [visibleDays, availabilityByMonth],
+  );
+
+  const getLiveAvailability = useCallback((date) => {
+    const dateKey = formatDateKey(date);
+
+    return availabilityByDate[dateKey] || getEmptyAvailability();
+  }, [availabilityByDate]);
+
+  const selectedInfo = getLiveAvailability(selectedDate);
+  const selectedStyle = statusStyles[selectedInfo.status] || statusStyles.off;
 
   useEffect(() => {
     onSelectDateRef.current = onSelectDate;
   }, [onSelectDate]);
 
   useEffect(() => {
+    const controller = new AbortController();
+    const monthKeys = visibleDays.reduce((keys, day) => {
+      const cacheKey = getMonthCacheKey(day);
+
+      if (!keys.includes(cacheKey)) {
+        keys.push(cacheKey);
+      }
+
+      return keys;
+    }, []);
+
+    async function loadAvailability() {
+      await Promise.all(monthKeys.map(async (cacheKey) => {
+        if (availabilityByMonth[cacheKey]) {
+          return;
+        }
+
+        const [year, month] = cacheKey.split('-');
+        const response = await fetch(`${API_BASE_URL}/api/schedules/availability?year=${year}&month=${Number(month)}`, {
+          signal: controller.signal,
+          headers: { Accept: 'application/json' },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Schedule API ${response.status}`);
+        }
+
+        const json = await response.json();
+        const monthAvailability = (json.dates || []).reduce((dates, item) => ({
+          ...dates,
+          [item.date]: normalizeAvailabilityDate(item),
+        }), {});
+
+        setAvailabilityByMonth((current) => ({
+          ...current,
+          [cacheKey]: monthAvailability,
+        }));
+      }));
+    }
+
+    loadAvailability().catch((error) => {
+      if (error.name !== 'AbortError') {
+        console.error(error);
+      }
+    });
+
+    return () => controller.abort();
+  }, [visibleDays, availabilityByMonth]);
+
+  useEffect(() => {
     if (!onSelectDateRef.current) {
       return;
     }
 
-    const info = getAvailability(selectedDate);
+    const info = getLiveAvailability(selectedDate);
 
     onSelectDateRef.current({
       date: selectedDate,
@@ -259,7 +308,7 @@ export default function AvailabilityCalendar({ className = '', bookingMode = fal
       availability: info,
       isBookable: isBookableAvailability(info),
     });
-  }, [selectedDate]);
+  }, [getLiveAvailability, selectedDate]);
 
   const movePeriod = (direction) => {
     const nextDate = viewMode === 'week'
@@ -327,7 +376,7 @@ export default function AvailabilityCalendar({ className = '', bookingMode = fal
               </h3>
             </div>
             <p className="mt-0.5 text-[10px] uppercase tracking-[1.5px] text-[var(--p-muted)]">
-              Data dummy
+              Data admin
             </p>
           </div>
         </div>
@@ -404,8 +453,8 @@ export default function AvailabilityCalendar({ className = '', bookingMode = fal
               </div>
               <div className="grid grid-cols-7 gap-1.5">
                 {visibleDays.map((date) => {
-                  const info = getAvailability(date);
-                  const style = statusStyles[info.status];
+                  const info = getLiveAvailability(date);
+                  const style = statusStyles[info.status] || statusStyles.off;
                   const isSelected = isSameDate(date, selectedDate);
                   const isToday = isSameDate(date, today);
                   const isCurrentMonth = date.getMonth() === anchorDate.getMonth();
@@ -442,7 +491,7 @@ export default function AvailabilityCalendar({ className = '', bookingMode = fal
                       <div className={`${compact ? 'hidden' : 'mt-2 hidden min-h-[32px] sm:block'}`}>
                         <p className="truncate text-[11px] font-medium text-[var(--p-dark)]">{info.label}</p>
                         <p className="mt-0.5 truncate text-[10px] text-[var(--p-muted)]">
-                          {info.slots[0] || info.note}
+                          {slotLabel(info.slots[0]) || info.note}
                         </p>
                       </div>
                     </button>
@@ -453,8 +502,8 @@ export default function AvailabilityCalendar({ className = '', bookingMode = fal
           ) : (
             <div className="grid gap-3 md:grid-cols-7">
               {visibleDays.map((date) => {
-                const info = getAvailability(date);
-                const style = statusStyles[info.status];
+                const info = getLiveAvailability(date);
+                const style = statusStyles[info.status] || statusStyles.off;
                 const isSelected = isSameDate(date, selectedDate);
                 const isToday = isSameDate(date, today);
                 const isLocked = bookingMode && !isBookableAvailability(info);
@@ -490,12 +539,12 @@ export default function AvailabilityCalendar({ className = '', bookingMode = fal
                       {isToday ? 'Hari ini' : info.label}
                     </span>
                     <div className="mt-3 space-y-1.5">
-                      {(info.slots.length ? info.slots : [info.note]).slice(0, 3).map((slot) => (
+                      {(info.slots.length ? info.slots : [{ id: 'note', time: info.note }]).slice(0, 3).map((slot) => (
                         <span
-                          key={slot}
+                          key={slot.id || slot.time}
                           className="block truncate rounded-[4px] bg-white/80 px-2 py-1 text-[11px] text-[var(--p-dark)]"
                         >
-                          {slot}
+                          {slotLabel(slot)}
                         </span>
                       ))}
                     </div>
@@ -530,11 +579,11 @@ export default function AvailabilityCalendar({ className = '', bookingMode = fal
               {selectedInfo.slots.length > 0 ? (
                 selectedInfo.slots.map((slot) => (
                   <div
-                    key={slot}
+                    key={slot.id || slot.time}
                     className="flex items-center gap-2 rounded-[6px] border border-[var(--p-border)] bg-white px-3 py-2 text-[12px] text-[var(--p-dark)]"
                   >
                     <FiClock className="shrink-0 text-[var(--p)]" size={14} />
-                    <span>{slot}</span>
+                    <span>{slotLabel(slot)}</span>
                   </div>
                 ))
               ) : (

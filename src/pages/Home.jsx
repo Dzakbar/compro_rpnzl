@@ -5,6 +5,7 @@ import CalendarSection from '../components/sections/CalendarSection';
 import GallerySection from '../components/sections/GallerySection';
 import TestimoniSection from '../components/sections/TestimoniSection';
 import CtaSection from '../components/sections/CtaSection';
+import WhatsAppButton from '../components/ui/WhatsAppButton';
 
 export default function Home() {
   return (
@@ -15,6 +16,7 @@ export default function Home() {
       <CalendarSection />
       <TestimoniSection />
       <CtaSection />
+      <WhatsAppButton />
     </main>
   );
 }

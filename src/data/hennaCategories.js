@@ -12,8 +12,8 @@ export const hennaCategories = [
     images: ['/photo_utama.jpeg', '/about1.jpeg', '/photo_utama2.jpeg'],
   },
   {
-    id: 'marron',
-    slug: 'marron',
+    id: 'maroon',
+    slug: 'maroon',
     name: 'Maroon Henna',
     tone: 'Deep romantic',
     price: 'Mulai dari Rp 380.000',

@@ -1,17 +1,19 @@
 export const OWNER_WHATSAPP_NUMBER = '6282114352721';
-export const ADMIN_BOOKINGS_KEY = 'rpnzl_admin_bookings';
 
+/**
+ * @deprecated - Bookings are now stored in Supabase via rpnzl-art backend API
+ * Use POST /api/bookings endpoint instead of localStorage
+ */
 export function getAdminBookings() {
-  try {
-    return JSON.parse(localStorage.getItem(ADMIN_BOOKINGS_KEY) || '[]');
-  } catch {
-    return [];
-  }
+  console.warn('getAdminBookings is deprecated. Admin bookings are now fetched from rpnzl-art backend.');
+  return [];
 }
 
+/**
+ * @deprecated - Use POST /api/bookings endpoint instead
+ */
 export function saveAdminBooking(booking) {
-  const bookings = getAdminBookings();
-  localStorage.setItem(ADMIN_BOOKINGS_KEY, JSON.stringify([booking, ...bookings]));
+  console.warn('saveAdminBooking is deprecated. Use POST /api/bookings endpoint instead.');
 }
 
 export function createOwnerWhatsAppUrl(message) {

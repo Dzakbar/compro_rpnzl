@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import SectionTitle from '../ui/SectionTitle';
 import RevealSection from '../ui/RevealSection';
-import { hennaCategories } from '../../data/hennaCategories';
+import { useCompanyProfile } from '../../hooks/useCompanyProfile';
 
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } };
 const card = {
@@ -12,6 +12,8 @@ const card = {
 };
 
 export default function ServicesSection() {
+  const { categories } = useCompanyProfile();
+
   return (
     <section className="py-[72px] px-10 bg-[var(--p-ultra)]">
       <RevealSection>
@@ -25,7 +27,7 @@ export default function ServicesSection() {
         whileInView="show"
         viewport={{ once: true, margin: '-60px' }}
       >
-        {hennaCategories.map((category) => (
+        {categories.map((category) => (
           <motion.div key={category.id} variants={card}>
             <Link
               to={`/booking?category=${category.id}`}

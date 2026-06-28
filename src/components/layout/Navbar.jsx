@@ -1,8 +1,12 @@
 // src/components/layout/Navbar.jsx
-import { NavLink } from 'react-router-dom';
-import { FiChevronDown } from 'react-icons/fi';
+import { useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { FiChevronDown, FiLogOut } from 'react-icons/fi';
 import Button from '../ui/Button';
-import { getHennaCategorySlug, hennaCategories } from '../../data/hennaCategories';
+import { getHennaCategorySlug } from '../../data/hennaCategories';
+import { useCompanyProfile } from '../../hooks/useCompanyProfile';
+import { useAuth } from '../../hooks/useAuth';
+import { getAdminBookings } from '../../data/bookingConfig';
 
 const navItems = [
   { label: 'Home', to: '/' },
@@ -19,6 +23,37 @@ const navLinkClass = ({ isActive }) => `
 `;
 
 export default function Navbar() {
+  const navigate = useNavigate();
+  const { user, isAuthenticated, logout } = useAuth();
+  const { categories } = useCompanyProfile();
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  
+  // Get user's bookings
+  const getUserBookings = () => {
+    if (!user) return [];
+    const allBookings = getAdminBookings();
+    return allBookings.filter(booking => booking.customer.whatsapp === user.phone);
+  };
+  
+  const userBookings = getUserBookings();
+  const pendingBookings = userBookings.filter(b => b.status === 'pending');
+  const confirmedBookings = userBookings.filter(b => b.status === 'confirmed');
+  
+  const handleLogout = () => {
+    logout();
+    setShowUserMenu(false);
+    navigate('/');
+  };
+  
+  const getInitials = (name) => {
+    return name
+      ?.split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2) || '?';
+  };
+
   return (
     <nav className="
       flex items-center justify-between px-10 py-4
@@ -59,7 +94,7 @@ export default function Navbar() {
             group-focus-within:visible group-focus-within:opacity-100
           ">
             <div className="border border-[var(--p-border)] bg-white/95 py-2 shadow-[0_18px_45px_rgba(61,31,43,0.12)] backdrop-blur-sm">
-              {hennaCategories.map((category) => (
+              {categories.map((category) => (
                 <NavLink
                   key={category.id}
                   to={`/gallery/${getHennaCategorySlug(category)}`}
@@ -90,7 +125,108 @@ export default function Navbar() {
         ))}
       </ul>
 
-      <Button variant="outline">Login</Button>
+      {isAuthenticated ? (
+        <div className="relative">
+          <button
+            onClick={() => setShowUserMenu(!showUserMenu)}
+            className="flex items-center gap-2 rounded-full bg-[var(--p)] text-white p-2 hover:bg-[var(--p-light)] transition-colors"
+            aria-label="User menu"
+          >
+            <div className="w-8 h-8 flex items-center justify-center rounded-full bg-[var(--p-mid)] text-[12px] font-bold">
+              {getInitials(user?.name)}
+            </div>
+          </button>
+
+          {showUserMenu && (
+            <div className="absolute right-0 top-full mt-2 w-[280px] rounded-[6px] border border-[var(--p-border)] bg-white shadow-[0_18px_45px_rgba(61,31,43,0.12)] backdrop-blur-sm z-50">
+              {/* User Info Header */}
+              <div className="border-b border-[var(--p-border)] px-4 py-4">
+                <p className="text-[11px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
+                  Akun Anda
+                </p>
+                <p className="mt-2 text-[13px] font-serif text-[var(--p-dark)]">
+                  {user?.name}
+                </p>
+                <p className="text-[11px] text-[var(--p-muted)]">
+                  {user?.phone}
+                </p>
+              </div>
+
+              {/* Booking Status */}
+              <div className="border-b border-[var(--p-border)] px-4 py-4">
+                <p className="text-[10px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)] mb-3">
+                  Status Booking
+                </p>
+                
+                {userBookings.length === 0 ? (
+                  <p className="text-[11px] text-[var(--p-muted)]">
+                    Belum ada booking
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {/* Pending Bookings */}
+                    {pendingBookings.length > 0 && (
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
+                        <span className="text-[11px] text-[var(--p-muted)]">
+                          {pendingBookings.length} Pending
+                        </span>
+                      </div>
+                    )}
+                    
+                    {/* Confirmed Bookings */}
+                    {confirmedBookings.length > 0 && (
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                        <span className="text-[11px] text-[var(--p-muted)]">
+                          {confirmedBookings.length} Confirmed
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="mt-3 text-[10px] text-[var(--p-muted)] space-y-1">
+                      {userBookings.slice(0, 3).map((booking) => (
+                        <div key={booking.id} className="rounded px-2 py-1 bg-[var(--p-ultra)]">
+                          <p className="font-medium text-[var(--p-dark)]">
+                            {booking.category.name}
+                          </p>
+                          <p className="text-[9px] text-[var(--p-muted)]">
+                            {booking.schedule.dateLabel} • {booking.schedule.slot}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+               {/* Actions */}
+               <div className="px-4 py-3 space-y-2">
+                 <button
+                   onClick={() => {
+                     navigate('/user/bookings');
+                     setShowUserMenu(false);
+                   }}
+                   className="w-full text-left px-3 py-2 rounded text-[11px] font-medium uppercase tracking-[1px] text-[var(--p-mid)] hover:bg-[var(--p-ultra)] transition-colors"
+                 >
+                   Lihat Booking
+                 </button>
+                 <button
+                   onClick={handleLogout}
+                   className="w-full flex items-center gap-2 px-3 py-2 rounded text-[11px] font-medium uppercase tracking-[1px] text-red-600 hover:bg-red-50 transition-colors"
+                 >
+                   <FiLogOut size={12} />
+                   Logout
+                 </button>
+               </div>
+            </div>
+          )}
+        </div>
+      ) : (
+        <Button variant="outline" onClick={() => navigate('/booking')}>
+          Login
+        </Button>
+      )}
     </nav>
   );
 }

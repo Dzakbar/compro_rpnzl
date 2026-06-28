@@ -2,21 +2,19 @@ import { Link, Navigate, useParams } from 'react-router-dom';
 import { FiArrowRight } from 'react-icons/fi';
 import RevealSection from '../components/ui/RevealSection';
 import SectionTitle from '../components/ui/SectionTitle';
-import {
-  getHennaCategory,
-  getHennaCategorySlug,
-  hennaCategories,
-} from '../data/hennaCategories';
+import { getHennaCategorySlug } from '../data/hennaCategories';
+import { getCompanyProfileCategory, useCompanyProfile } from '../hooks/useCompanyProfile';
 
 export default function Gallery() {
   const { categorySlug } = useParams();
-  const defaultSlug = getHennaCategorySlug(hennaCategories[0]);
+  const { categories } = useCompanyProfile();
+  const defaultSlug = getHennaCategorySlug(categories[0]);
 
   if (!categorySlug) {
     return <Navigate to={`/gallery/${defaultSlug}`} replace />;
   }
 
-  const category = getHennaCategory(categorySlug);
+  const category = getCompanyProfileCategory(categories, categorySlug);
   const activeSlug = getHennaCategorySlug(category);
 
   if (categorySlug !== activeSlug) {
@@ -65,7 +63,7 @@ export default function Gallery() {
 
           <div className="mt-10 text-center">
             <Link
-              to={`/booking?category=${category.id}`}
+              to={`/booking?category=${category.slug}`}
               className="inline-flex items-center gap-2 border border-[var(--p-mid)] px-6 py-3 text-[12px] font-semibold uppercase tracking-[1.5px] text-[var(--p-mid)] no-underline transition-colors hover:bg-[var(--p-mid)] hover:text-white"
             >
               Booking {category.name}

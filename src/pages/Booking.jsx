@@ -1,10 +1,13 @@
 // src/pages/Booking.jsx
-import { useCallback, useMemo, useState } from 'react';
+import { GoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from 'jwt-decode';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FiCalendar, FiLock, FiMail, FiStar, FiX } from 'react-icons/fi';
 import { useSearchParams } from 'react-router-dom';
 import AvailabilityCalendar from '../components/sections/AvailabilityCalendar';
-import { createOwnerWhatsAppUrl, saveAdminBooking } from '../data/bookingConfig';
-import { getHennaCategory } from '../data/hennaCategories';
+import { getCompanyProfileCategory, useCompanyProfile } from '../hooks/useCompanyProfile';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 const emptyForm = {
   name: '',
@@ -20,35 +23,54 @@ const inputClass =
 const textareaClass =
   'min-h-[104px] w-full border border-[var(--p-border)] bg-[#f8f6f0] px-4 py-3 text-[13px] text-[var(--p-dark)] outline-none transition placeholder:text-[var(--p-muted)]/60 focus:border-[var(--p)]';
 
-function buildWhatsAppMessage(booking) {
-  return [
-    'Halo RPNZL Art, saya ingin booking henna.',
-    '',
-    `Booking ID: ${booking.id}`,
-    `Kategori: ${booking.category.name}`,
-    `Harga: ${booking.category.price}`,
-    `Tanggal: ${booking.schedule.dateLabel}`,
-    `Jam: ${booking.schedule.slot}`,
-    '',
-    `Nama: ${booking.customer.name}`,
-    `WhatsApp: ${booking.customer.whatsapp}`,
-    `Acara: ${booking.customer.eventType}`,
-    `Lokasi: ${booking.customer.location}`,
-    `Catatan: ${booking.customer.notes || '-'}`,
-  ].join('\n');
-}
-
 function LoginModal({ onClose, onLogin }) {
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [loginError, setLoginError] = useState('');
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    onLogin();
+    // Email/password login - optional fallback
+    setIsLoggingIn(true);
+    // Simulate email login
+    setTimeout(() => {
+      const userData = {
+        name: loginForm.email.split('@')[0],
+        email: loginForm.email,
+        provider: 'email',
+      };
+      localStorage.setItem('rpnzl_user_login', 'true');
+      localStorage.setItem('rpnzl_user_data', JSON.stringify(userData));
+      onLogin(userData);
+      setIsLoggingIn(false);
+    }, 500);
   };
 
   const handleChange = (event) => {
     const { name, value } = event.target;
     setLoginForm((current) => ({ ...current, [name]: value }));
+  };
+
+  const handleGoogleSuccess = (credentialResponse) => {
+    try {
+      const decoded = jwtDecode(credentialResponse.credential);
+      const userData = {
+        name: decoded.name,
+        email: decoded.email,
+        picture: decoded.picture,
+        provider: 'google',
+      };
+      localStorage.setItem('rpnzl_user_login', 'true');
+      localStorage.setItem('rpnzl_user_data', JSON.stringify(userData));
+      onLogin(userData);
+    } catch (error) {
+      console.error('Failed to decode Google token:', error);
+      setLoginError('Gagal login dengan Google');
+    }
+  };
+
+  const handleGoogleError = () => {
+    setLoginError('Gagal login dengan Google');
   };
 
   return (
@@ -65,22 +87,22 @@ function LoginModal({ onClose, onLogin }) {
 
         <div className="flex flex-col justify-center border-b border-[var(--p-border)] pb-8 text-center md:border-b-0 md:border-r md:pb-0 md:pr-10">
           <p className="text-[18px] leading-relaxed text-[var(--p-mid)]">
-            Or you can also Sign In with:
+            Atau Sign In dengan:
           </p>
-          <button
-            type="button"
-            onClick={onLogin}
-            className="mt-7 h-14 bg-[#425f9c] px-6 text-[13px] font-semibold uppercase tracking-[1.6px] text-white transition hover:opacity-90"
-          >
-            Sign in with Facebook
-          </button>
-          <button
-            type="button"
-            onClick={onLogin}
-            className="mt-4 h-14 bg-[#d35643] px-6 text-[13px] font-semibold uppercase tracking-[1.6px] text-white transition hover:opacity-90"
-          >
-            Sign in with Google
-          </button>
+
+          <div className="mt-7 flex items-center justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              text="signin_with"
+              size="large"
+              logo_alignment="center"
+            />
+          </div>
+
+          {loginError && (
+            <p className="mt-4 text-[13px] text-red-500">{loginError}</p>
+          )}
         </div>
 
         <form onSubmit={handleSubmit} className="md:pl-3">
@@ -126,9 +148,10 @@ function LoginModal({ onClose, onLogin }) {
 
           <button
             type="submit"
-            className="mt-8 h-14 w-full bg-[var(--p)] text-[13px] font-semibold uppercase tracking-[1.8px] text-white transition hover:bg-[var(--p-deep)]"
+            disabled={isLoggingIn}
+            className="mt-8 h-14 w-full bg-[var(--p)] text-[13px] font-semibold uppercase tracking-[1.8px] text-white transition hover:bg-[var(--p-deep)] disabled:opacity-50"
           >
-            Sign in
+            {isLoggingIn ? 'Signing in...' : 'Sign in'}
           </button>
         </form>
       </div>
@@ -138,30 +161,72 @@ function LoginModal({ onClose, onLogin }) {
 
 export default function Booking() {
   const [searchParams] = useSearchParams();
+  const { categories } = useCompanyProfile();
+  
   const category = useMemo(
-    () => getHennaCategory(searchParams.get('category')),
-    [searchParams],
+    () => getCompanyProfileCategory(categories, searchParams.get('category')),
+    [categories, searchParams],
   );
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(
     () => localStorage.getItem('rpnzl_user_login') === 'true',
   );
+  const [isLoginOpen, setIsLoginOpen] = useState(
+    () => localStorage.getItem('rpnzl_user_login') !== 'true',
+  );
   const [selectedSchedule, setSelectedSchedule] = useState(null);
-  const [selectedSlot, setSelectedSlot] = useState('');
+  const [selectedSlotId, setSelectedSlotId] = useState('');
   const [form, setForm] = useState(emptyForm);
   const [submitStatus, setSubmitStatus] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const activeImage = category.images[activeImageIndex] || category.images[0];
+  const bookableSlots = useMemo(
+    () => (selectedSchedule?.availability.slots || []).filter((slot) => slot.bookable),
+    [selectedSchedule],
+  );
+  const selectedSlot = useMemo(
+    () => bookableSlots.find((slot) => slot.id === selectedSlotId) || null,
+    [bookableSlots, selectedSlotId],
+  );
+
+  useEffect(() => {
+    setActiveImageIndex(0);
+  }, [category.id]);
+
+  // Auto-fill name from Google profile if available
+  useEffect(() => {
+    if (isLoggedIn && !form.name) {
+      const userDataStr = localStorage.getItem('rpnzl_user_data');
+      if (userDataStr) {
+        try {
+          const userData = JSON.parse(userDataStr);
+          const userName = userData.name || '';
+          if (userName) {
+            setForm((current) => ({ ...current, name: userName }));
+          }
+        } catch (error) {
+          console.error('Error parsing user data:', error);
+        }
+      }
+    }
+  }, [isLoggedIn]);
 
   const handleSelectDate = useCallback((schedule) => {
+    // Check if user is logged in
+    if (!isLoggedIn) {
+      setIsLoginOpen(true);
+      return;
+    }
     setSelectedSchedule(schedule);
-    setSelectedSlot('');
-  }, []);
+    setSelectedSlotId('');
+  }, [isLoggedIn]);
 
-  const handleLogin = () => {
-    localStorage.setItem('rpnzl_user_login', 'true');
+  const handleLogin = (userData) => {
+    if (userData) {
+      localStorage.setItem('rpnzl_user_data', JSON.stringify(userData));
+    }
     setIsLoggedIn(true);
     setIsLoginOpen(false);
   };
@@ -171,7 +236,7 @@ export default function Booking() {
     setForm((current) => ({ ...current, [name]: value }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     setSubmitStatus('');
 
@@ -185,31 +250,109 @@ export default function Booking() {
       return;
     }
 
-    const booking = {
-      id: `RPNZL-${Date.now()}`,
-      createdAt: new Date().toISOString(),
-      status: 'pending',
-      category: {
-        id: category.id,
-        name: category.name,
-        price: category.price,
-      },
-      schedule: {
-        dateKey: selectedSchedule.dateKey,
-        dateLabel: selectedSchedule.dateLabel,
-        slot: selectedSlot,
-      },
-      customer: form,
-    };
+    if (!category.packageId) {
+      setSubmitStatus('Paket belum tersedia dari admin. Coba refresh halaman.');
+      return;
+    }
 
-    saveAdminBooking(booking);
+    // Validate required fields
+    if (!form.name) {
+      setSubmitStatus('Masukkan nama Anda.');
+      return;
+    }
 
-    const message = buildWhatsAppMessage(booking);
-    window.open(createOwnerWhatsAppUrl(message), '_blank', 'noopener,noreferrer');
+    if (!form.whatsapp) {
+      setSubmitStatus('Masukkan nomor WhatsApp Anda.');
+      return;
+    }
 
-    setForm(emptyForm);
-    setSelectedSlot('');
-    setSubmitStatus(`Booking ${booking.id} sudah masuk ke dashboard admin.`);
+    setIsSubmitting(true);
+
+    // Read email from login data stored in localStorage
+    const userDataStr = localStorage.getItem('rpnzl_user_data');
+    let userEmail = '';
+    
+    try {
+      if (userDataStr) {
+        const userData = JSON.parse(userDataStr);
+        userEmail = userData.email || '';
+      }
+    } catch (error) {
+      console.error('Error parsing user data:', error);
+    }
+
+    // Validate email is not empty
+    if (!userEmail) {
+      setSubmitStatus('Email Anda tidak ditemukan. Coba login ulang.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      // Extract time from selectedSlot.time (format: "10:00")
+      const bookingTime = selectedSlot.time;
+      
+      // Build payload for API
+      const payload = {
+        package_id: category.packageId,
+        booking_date: selectedSchedule.dateKey,
+        booking_time: bookingTime,
+        event_type: form.eventType,
+        location: form.location,
+        customization_notes: form.notes || null,
+        customer: {
+          name: form.name,
+          whatsapp_number: form.whatsapp,
+          email: userEmail,
+        },
+      };
+
+      // POST to backend API
+      const response = await fetch(`${API_BASE_URL}/api/bookings`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Handle validation errors from API
+        if (response.status === 422 && data.errors) {
+          const errorMessages = Object.values(data.errors)
+            .flat()
+            .join(' ');
+          setSubmitStatus(`❌ ${errorMessages || 'Validasi gagal. Coba lagi.'}`);
+        } else if (data.message) {
+          setSubmitStatus(`❌ ${data.message}`);
+        } else {
+          setSubmitStatus(`❌ Booking gagal dikirim. Status: ${response.status}`);
+        }
+        return;
+      }
+
+      // Success - get booking data from response
+      const bookingId = data.booking?.id || 'unknown';
+      const waUrl = data.wa_url || `https://wa.me/6282114352721`;
+
+      // Reset form
+      setForm(emptyForm);
+      setSelectedSlotId('');
+      setSubmitStatus(`✓ Booking ${bookingId} berhasil disimpan ke database admin.`);
+      
+      // Open WhatsApp to notify owner
+      setTimeout(() => {
+        window.open(waUrl, '_blank', 'noopener,noreferrer');
+      }, 1000);
+    } catch (error) {
+      console.error('Booking error:', error);
+      setSubmitStatus(error.message || 'Booking gagal dikirim. Coba lagi.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -289,6 +432,22 @@ export default function Booking() {
               <p className="mb-4 text-[13px] font-semibold uppercase tracking-[1px] text-[var(--p-mid)]">
                 Availability
               </p>
+              
+              {!isLoggedIn && (
+                <div className="mb-4 border border-dashed border-amber-300 bg-amber-50 p-4 text-center">
+                  <p className="text-[12px] text-amber-900">
+                    <span className="font-semibold">Sign in required</span> to select date and time
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setIsLoginOpen(true)}
+                    className="mt-3 h-10 w-full bg-amber-600 text-[12px] font-semibold uppercase tracking-[1px] text-white transition hover:bg-amber-700"
+                  >
+                    Sign in now
+                  </button>
+                </div>
+              )}
+              
               <AvailabilityCalendar
                 bookingMode
                 compact
@@ -329,15 +488,15 @@ export default function Booking() {
                   </span>
                   <select
                     required
-                    value={selectedSlot}
-                    onChange={(event) => setSelectedSlot(event.target.value)}
+                    value={selectedSlotId}
+                    onChange={(event) => setSelectedSlotId(event.target.value)}
                     disabled={!selectedSchedule?.isBookable}
                     className={inputClass}
                   >
                     <option value="">Pilih jam</option>
-                    {(selectedSchedule?.availability.slots || []).map((slot) => (
-                      <option key={slot} value={slot}>
-                        {slot}
+                    {bookableSlots.map((slot) => (
+                      <option key={slot.id} value={slot.id}>
+                        {slot.remainingSlots > 0 ? `${slot.time} (${slot.remainingSlots} tersisa)` : slot.time}
                       </option>
                     ))}
                   </select>
@@ -426,15 +585,30 @@ export default function Booking() {
 
                     <button
                       type="submit"
+                      disabled={isSubmitting}
                       className="h-12 bg-[var(--p)] px-7 text-[11px] font-semibold uppercase tracking-[1.8px] text-white transition hover:bg-[var(--p-deep)] md:col-span-2"
                     >
-                      Kirim booking
+                      {isSubmitting ? 'Mengirim...' : 'Kirim booking'}
                     </button>
                   </div>
                 )}
 
                 {submitStatus && (
-                  <p className="text-[12px] leading-relaxed text-[var(--p-muted)]">{submitStatus}</p>
+                  <div className="rounded-[6px] border border-dashed border-amber-300 bg-amber-50 p-4">
+                    <p className="text-[12px] leading-relaxed text-amber-900">{submitStatus}</p>
+                    {submitStatus.includes('Email Anda tidak ditemukan') && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSubmitStatus('');
+                          setIsLoginOpen(true);
+                        }}
+                        className="mt-3 h-9 w-full rounded-[4px] bg-amber-600 text-[11px] font-semibold uppercase tracking-[1px] text-white transition hover:bg-amber-700"
+                      >
+                        Login ulang
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
             </form>
