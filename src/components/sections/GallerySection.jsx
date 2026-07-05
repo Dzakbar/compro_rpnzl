@@ -1,41 +1,16 @@
 // src/components/sections/GallerySection.jsx
-import { useRef, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FiArrowRight } from 'react-icons/fi';
 import RevealSection from '../ui/RevealSection';
 import SectionTitle from '../ui/SectionTitle';
 import { useCompanyProfile } from '../../hooks/useCompanyProfile';
-import { useImageDimensions } from '../../hooks/useImageDimensions';
+
+const FEATURED_ASPECT_RATIO = '3 / 2';
+const GRID_ASPECT_RATIOS = ['3 / 4', '3 / 2'];
 
 export default function GallerySection() {
   const { categories } = useCompanyProfile();
   const [featuredItem, ...gridItems] = categories;
-  const containerRef = useRef(null);
-  const [containerWidth, setContainerWidth] = useState(1180);
-
-  // Detect featured image aspect ratio (fallback: 16:9)
-  const { aspectRatio: featuredRatio } = useImageDimensions(
-    featuredItem?.images?.[0],
-    16 / 9
-  );
-
-  // Calculate featured item height
-  const featuredHeight = Math.round(containerWidth / (featuredRatio || 16 / 9));
-
-  useEffect(() => {
-    if (containerRef.current) {
-      setContainerWidth(containerRef.current.offsetWidth);
-    }
-
-    const handleResize = () => {
-      if (containerRef.current) {
-        setContainerWidth(containerRef.current.offsetWidth);
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   if (!featuredItem) {
     return null;
@@ -46,11 +21,11 @@ export default function GallerySection() {
       <RevealSection>
         <SectionTitle label="Portfolio" title="Karya Kami" center />
 
-        <div ref={containerRef} className="mx-auto mt-8 max-w-[1180px] space-y-5">
+        <div className="mx-auto mt-8 max-w-[1180px] space-y-5">
           <Link
             to={`/booking?category=${featuredItem.slug}`}
             className="group relative block overflow-hidden bg-[var(--p-light)]"
-            style={{ height: `${featuredHeight}px` }}
+            style={{ aspectRatio: FEATURED_ASPECT_RATIO }}
             aria-label={`Booking untuk ${featuredItem.name}`}
           >
             <img
@@ -76,8 +51,8 @@ export default function GallerySection() {
           </Link>
 
           <div className="grid gap-5 md:grid-cols-2">
-            {gridItems.map((item) => (
-              <GridItem key={item.id} item={item} containerWidth={containerWidth} />
+            {gridItems.map((item, index) => (
+              <GridItem key={item.id} item={item} aspectRatio={GRID_ASPECT_RATIOS[index] || GRID_ASPECT_RATIOS[1]} />
             ))}
           </div>
         </div>
@@ -86,24 +61,12 @@ export default function GallerySection() {
   );
 }
 
-// Grid item component dengan dynamic height
-function GridItem({ item, containerWidth }) {
-  const { aspectRatio } = useImageDimensions(item.images?.[0], 1 / 1);
-  
-  // Hitung width per item: (containerWidth - gap) / 2 untuk md:grid-cols-2
-  // gap = 20px (gap-5 = 1.25rem = 20px)
-  // mobile: full width, desktop: half width - gap/2
-  const itemWidth = containerWidth > 768 
-    ? (containerWidth - 20) / 2 
-    : containerWidth;
-  
-  const itemHeight = Math.round(itemWidth / (aspectRatio || 1));
-
+function GridItem({ item, aspectRatio }) {
   return (
     <Link
       to={`/booking?category=${item.slug}`}
       className="group relative block overflow-hidden bg-[var(--p-light)]"
-      style={{ height: `${itemHeight}px` }}
+      style={{ aspectRatio }}
       aria-label={`Booking untuk ${item.name}`}
     >
       <img

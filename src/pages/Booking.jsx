@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FiCalendar, FiLock, FiMail, FiStar, FiX } from 'react-icons/fi';
 import { useSearchParams } from 'react-router-dom';
 import AvailabilityCalendar from '../components/sections/AvailabilityCalendar';
+import { notifyAuthChanged } from '../hooks/useAuth';
 import { getCompanyProfileCategory, useCompanyProfile } from '../hooks/useCompanyProfile';
 import { getApiBaseUrl } from '../lib/apiBaseUrl';
 
@@ -42,6 +43,7 @@ function LoginModal({ onClose, onLogin }) {
       };
       localStorage.setItem('rpnzl_user_login', 'true');
       localStorage.setItem('rpnzl_user_data', JSON.stringify(userData));
+      notifyAuthChanged();
       onLogin(userData);
       setIsLoggingIn(false);
     }, 500);
@@ -63,6 +65,7 @@ function LoginModal({ onClose, onLogin }) {
       };
       localStorage.setItem('rpnzl_user_login', 'true');
       localStorage.setItem('rpnzl_user_data', JSON.stringify(userData));
+      notifyAuthChanged();
       onLogin(userData);
     } catch (error) {
       console.error('Failed to decode Google token:', error);
@@ -226,7 +229,9 @@ export default function Booking() {
 
   const handleLogin = (userData) => {
     if (userData) {
+      localStorage.setItem('rpnzl_user_login', 'true');
       localStorage.setItem('rpnzl_user_data', JSON.stringify(userData));
+      notifyAuthChanged();
     }
     setIsLoggedIn(true);
     setIsLoginOpen(false);

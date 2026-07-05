@@ -1,7 +1,7 @@
 // src/pages/UserDashboard.jsx
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiLogOut, FiClock, FiCheck, FiX } from 'react-icons/fi';
+import { FiLogOut, FiClock, FiCheck } from 'react-icons/fi';
 import { useAuth } from '../hooks/useAuth';
 import BookingCard from '../components/sections/BookingCard';
 import SectionTitle from '../components/ui/SectionTitle';
@@ -14,6 +14,7 @@ export default function UserDashboard() {
   const { user, isAuthenticated, logout } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const hasLoadedBookings = useRef(false);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -30,9 +31,8 @@ export default function UserDashboard() {
   }, [isAuthenticated, user, navigate]);
 
   // Fetch user bookings
-  const fetchBookings = async () => {
+  const fetchBookings = useCallback(async () => {
     try {
-      setLoading(true);
       // Get user email from stored data
       const userDataStr = localStorage.getItem('rpnzl_user_data');
       if (!userDataStr) {
@@ -62,25 +62,19 @@ export default function UserDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  // Initial fetch
+  // Load bookings once when entering the user page.
   useEffect(() => {
-    if (isAuthenticated) {
+    if (!isAuthenticated || hasLoadedBookings.current) return;
+
+    hasLoadedBookings.current = true;
+    const timer = window.setTimeout(() => {
       fetchBookings();
-    }
-  }, [isAuthenticated]);
+    }, 0);
 
-  // Polling for real-time updates (15 seconds)
-  useEffect(() => {
-    if (!isAuthenticated) return;
-
-    const interval = setInterval(() => {
-      fetchBookings();
-    }, 15000);
-
-    return () => clearInterval(interval);
-  }, [isAuthenticated]);
+    return () => window.clearTimeout(timer);
+  }, [fetchBookings, isAuthenticated]);
 
   const handleLogout = () => {
     logout();

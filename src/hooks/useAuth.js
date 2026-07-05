@@ -1,31 +1,68 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+
+export const AUTH_CHANGE_EVENT = 'rpnzl-auth-change';
+
+export function notifyAuthChanged() {
+  window.dispatchEvent(new Event(AUTH_CHANGE_EVENT));
+}
+
+function readStoredUser() {
+  const userDataStr = localStorage.getItem('rpnzl_user_data');
+
+  if (!userDataStr) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(userDataStr);
+  } catch (error) {
+    console.error('Error parsing user data:', error);
+    localStorage.removeItem('rpnzl_user_login');
+    localStorage.removeItem('rpnzl_user_data');
+    return null;
+  }
+}
+
+function getInitialAuthState() {
+  const userData = readStoredUser();
+
+  return {
+    user: userData,
+    isAuthenticated: Boolean(userData),
+  };
+}
 
 export function useAuth() {
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [{ user, isAuthenticated }, setAuthState] = useState(getInitialAuthState);
+  const loading = false;
+
+  const syncAuthState = useCallback(() => {
+    const userData = readStoredUser();
+
+    setAuthState({
+      user: userData,
+      isAuthenticated: Boolean(userData),
+    });
+  }, []);
 
   useEffect(() => {
-    // Check if user is logged in from localStorage
-    const userDataStr = localStorage.getItem('rpnzl_user_data');
-    if (userDataStr) {
-      try {
-        const userData = JSON.parse(userDataStr);
-        setUser(userData);
-        setIsAuthenticated(true);
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-        localStorage.removeItem('rpnzl_user_data');
-      }
-    }
-    setLoading(false);
-  }, []);
+    window.addEventListener(AUTH_CHANGE_EVENT, syncAuthState);
+    window.addEventListener('storage', syncAuthState);
+
+    return () => {
+      window.removeEventListener(AUTH_CHANGE_EVENT, syncAuthState);
+      window.removeEventListener('storage', syncAuthState);
+    };
+  }, [syncAuthState]);
 
   const logout = () => {
     localStorage.removeItem('rpnzl_user_login');
     localStorage.removeItem('rpnzl_user_data');
-    setUser(null);
-    setIsAuthenticated(false);
+    setAuthState({
+      user: null,
+      isAuthenticated: false,
+    });
+    notifyAuthChanged();
   };
 
   return {
@@ -35,4 +72,3 @@ export function useAuth() {
     logout,
   };
 }
-

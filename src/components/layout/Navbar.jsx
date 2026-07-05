@@ -32,7 +32,9 @@ export default function Navbar() {
   const getUserBookings = () => {
     if (!user) return [];
     const allBookings = getAdminBookings();
-    return allBookings.filter(booking => booking.customer.whatsapp === user.phone);
+    return allBookings.filter((booking) => (
+      booking.customer?.whatsapp === user.phone || booking.customer?.email === user.email
+    ));
   };
   
   const userBookings = getUserBookings();
@@ -44,6 +46,11 @@ export default function Navbar() {
     setShowUserMenu(false);
     navigate('/');
   };
+
+  const handleOpenUserDashboard = () => {
+    setShowUserMenu(false);
+    navigate('/user/bookings');
+  };
   
   const getInitials = (name) => {
     return name
@@ -53,6 +60,8 @@ export default function Navbar() {
       .toUpperCase()
       .slice(0, 2) || '?';
   };
+
+  const userContact = user?.phone || user?.email || '';
 
   return (
     <nav className="
@@ -126,15 +135,37 @@ export default function Navbar() {
       </ul>
 
       {isAuthenticated ? (
-        <div className="relative">
+        <div className="relative flex items-center gap-2">
           <button
-            onClick={() => setShowUserMenu(!showUserMenu)}
-            className="flex items-center gap-2 rounded-full bg-[var(--p)] text-white p-2 hover:bg-[var(--p-light)] transition-colors"
-            aria-label="User menu"
+            type="button"
+            onClick={handleOpenUserDashboard}
+            className="flex max-w-[180px] items-center gap-2 rounded-full bg-[var(--p)] py-2 pl-2 pr-3 text-white transition-colors hover:bg-[var(--p-light)]"
+            aria-label="Buka halaman user"
           >
-            <div className="w-8 h-8 flex items-center justify-center rounded-full bg-[var(--p-mid)] text-[12px] font-bold">
-              {getInitials(user?.name)}
-            </div>
+            {user?.picture ? (
+              <img
+                src={user.picture}
+                alt=""
+                className="h-8 w-8 rounded-full object-cover"
+              />
+            ) : (
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--p-mid)] text-[12px] font-bold">
+                {getInitials(user?.name)}
+              </div>
+            )}
+            <span className="hidden truncate text-[11px] font-medium uppercase tracking-[1px] sm:inline">
+              {user?.name?.split(' ')[0] || 'User'}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowUserMenu(!showUserMenu)}
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--p)] text-[var(--p-mid)] transition-colors hover:bg-[var(--p-light)]"
+            aria-label="Buka menu user"
+            aria-expanded={showUserMenu}
+          >
+            <FiChevronDown size={15} />
           </button>
 
           {showUserMenu && (
@@ -148,7 +179,7 @@ export default function Navbar() {
                   {user?.name}
                 </p>
                 <p className="text-[11px] text-[var(--p-muted)]">
-                  {user?.phone}
+                  {userContact}
                 </p>
               </div>
 
@@ -203,10 +234,7 @@ export default function Navbar() {
                {/* Actions */}
                <div className="px-4 py-3 space-y-2">
                  <button
-                   onClick={() => {
-                     navigate('/user/bookings');
-                     setShowUserMenu(false);
-                   }}
+                   onClick={handleOpenUserDashboard}
                    className="w-full text-left px-3 py-2 rounded text-[11px] font-medium uppercase tracking-[1px] text-[var(--p-mid)] hover:bg-[var(--p-ultra)] transition-colors"
                  >
                    Lihat Booking
