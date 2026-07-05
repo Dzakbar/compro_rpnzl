@@ -54,7 +54,7 @@ export default function Gallery() {
                   alt={`${category.name} ${index + 1}`}
                   className={`
                     h-full w-full object-cover object-center transition duration-500 group-hover:scale-[1.04]
-                    ${index === 0 ? 'min-h-[420px] md:min-h-[620px]' : 'min-h-[300px]'}
+                  ${index === 0 ? 'min-h-[300px] md:min-h-[620px]' : 'min-h-[220px] md:min-h-[300px]'}
                   `}
                 />
               </figure>

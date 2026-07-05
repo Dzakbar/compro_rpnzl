@@ -34,17 +34,17 @@ export default function GallerySection() {
               className="h-full w-full object-cover object-center transition duration-500 group-hover:scale-[1.03]"
             />
             <div className="absolute inset-0 bg-white/15 transition group-hover:bg-white/5" />
-            <div className="absolute right-4 top-1/2 w-[220px] -translate-y-1/2 bg-[rgba(61,31,43,0.72)] px-7 py-7 text-right text-white backdrop-blur-[2px] md:right-8 md:w-[300px] md:px-8 md:py-8">
-              <h3 className="font-serif text-[26px] font-semibold leading-[1.05] md:text-[31px]">
+            <div className="absolute bottom-3 right-3 w-[min(220px,calc(100%-24px))] bg-[rgba(61,31,43,0.72)] px-4 py-4 text-right text-white backdrop-blur-[2px] md:right-8 md:top-1/2 md:w-[300px] md:-translate-y-1/2 md:px-8 md:py-8">
+              <h3 className="font-serif text-[22px] font-semibold leading-[1.05] md:text-[31px]">
                 {featuredItem.name}
               </h3>
-              <p className="mt-4 text-[12px] leading-relaxed text-white/85">
+              <p className="mt-3 line-clamp-2 text-[11px] leading-relaxed text-white/85 md:mt-4 md:line-clamp-none md:text-[12px]">
                 {featuredItem.shortDescription}
               </p>
-              <p className="mt-4 text-[10px] font-medium uppercase tracking-[1.5px] text-white/75">
+              <p className="mt-3 text-[10px] font-medium uppercase tracking-[1.2px] text-white/75 md:mt-4 md:tracking-[1.5px]">
                 {featuredItem.price}
               </p>
-              <span className="mt-7 inline-flex items-center gap-2 text-[13px] font-semibold text-white">
+              <span className="mt-4 inline-flex items-center gap-2 text-[12px] font-semibold text-white md:mt-7 md:text-[13px]">
                 Book Now <FiArrowRight size={18} />
               </span>
             </div>
@@ -75,11 +75,11 @@ function GridItem({ item, aspectRatio }) {
         className="h-full w-full object-cover object-center transition duration-500 group-hover:scale-[1.04]"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-[rgba(61,31,43,0.28)] via-transparent to-transparent opacity-80 transition group-hover:opacity-60" />
-      <div className="absolute bottom-8 right-7 max-w-[250px] bg-white/82 px-6 py-5 text-right backdrop-blur-[2px]">
-        <h3 className="font-serif text-[25px] font-semibold uppercase leading-[1.1] text-[var(--p-deep)]">
+      <div className="absolute bottom-3 right-3 max-w-[calc(100%-24px)] bg-white/82 px-4 py-3 text-right backdrop-blur-[2px] md:bottom-8 md:right-7 md:max-w-[250px] md:px-6 md:py-5">
+        <h3 className="font-serif text-[20px] font-semibold uppercase leading-[1.1] text-[var(--p-deep)] md:text-[25px]">
           {item.name}
         </h3>
-        <p className="mt-2 text-[11px] uppercase tracking-[1.5px] text-[var(--p-muted)]">
+        <p className="mt-2 text-[10px] uppercase tracking-[1.2px] text-[var(--p-muted)] md:text-[11px] md:tracking-[1.5px]">
           {item.price}
         </p>
       </div>

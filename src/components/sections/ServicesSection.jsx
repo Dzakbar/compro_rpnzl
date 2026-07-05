@@ -15,7 +15,7 @@ export default function ServicesSection() {
   const { categories } = useCompanyProfile();
 
   return (
-    <section className="py-[72px] px-10 bg-[var(--p-ultra)]">
+    <section className="bg-[var(--p-ultra)] px-5 py-14 md:px-10 md:py-[72px]">
       <RevealSection>
         <SectionTitle label="Layanan kami" title="Pilih paket<br>yang sesuai" center />
       </RevealSection>

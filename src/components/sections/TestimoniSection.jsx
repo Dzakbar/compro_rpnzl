@@ -4,7 +4,7 @@ import SectionTitle from '../ui/SectionTitle';
 
 export default function TestimoniSection() {
   return (
-    <section className="py-[72px] px-10 bg-white">
+    <section className="bg-white px-5 py-14 md:px-10 md:py-[72px]">
       <RevealSection>
         <SectionTitle label="Testimonials" title="Apa Kata Mereka" center />
         <div className="max-w-[600px] mx-auto mt-8 text-center italic text-[14px] text-[var(--p-mid)]">

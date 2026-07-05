@@ -4,8 +4,8 @@ const contacts  = ['Instagram', 'WhatsApp', 'Email', 'TikTok'];
 
 export default function Footer() {
   return (
-    <footer className="bg-[var(--p-dark)] px-10 pt-12 pb-7">
-      <div className="grid grid-cols-[2fr_1fr_1fr] gap-9 mb-9">
+    <footer className="bg-[var(--p-dark)] px-5 pb-7 pt-10 md:px-10 md:pt-12">
+      <div className="mb-9 grid gap-8 md:grid-cols-[2fr_1fr_1fr] md:gap-9">
 
         {/* Brand */}
         <div>
@@ -40,7 +40,7 @@ export default function Footer() {
       </div>
 
       {/* Bottom bar */}
-      <div className="border-t border-[rgba(232,164,187,0.12)] pt-5 flex justify-between">
+      <div className="flex flex-col gap-2 border-t border-[rgba(232,164,187,0.12)] pt-5 text-left md:flex-row md:justify-between">
         <p className="text-[10px] text-[rgba(245,208,223,0.25)] tracking-[0.5px]">© 2026 RPNZL Art. All rights reserved.</p>
         <p className="text-[10px] text-[rgba(245,208,223,0.25)]">Made with ♡ in Indonesia</p>
       </div>

@@ -7,7 +7,7 @@ export default function SectionTitle({ label, title, subtitle, center = false, l
     <div className={center ? 'text-center max-w-[480px] mx-auto' : ''}>
       <SectionLabel light={light}>{label}</SectionLabel>
       <h2 className={`
-        font-serif text-[36px] font-light leading-[1.2]
+        font-serif text-[30px] font-light leading-[1.2] md:text-[36px]
         ${light ? 'text-[var(--p-light)]' : 'text-[var(--p-mid)]'}
       `}
         dangerouslySetInnerHTML={{ __html: title }}

@@ -5,7 +5,7 @@ import AvailabilityCalendar from './AvailabilityCalendar';
 
 export default function CalendarSection() {
   return (
-    <section className="py-[72px] px-10 bg-white">
+    <section className="bg-white px-5 py-14 md:px-10 md:py-[72px]">
       <RevealSection>
         <SectionTitle
           label="Availability"

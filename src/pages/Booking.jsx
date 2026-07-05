@@ -1,7 +1,7 @@
 // src/pages/Booking.jsx
 import { GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { FiCalendar, FiLock, FiMail, FiStar, FiX } from 'react-icons/fi';
 import { useSearchParams } from 'react-router-dom';
 import AvailabilityCalendar from '../components/sections/AvailabilityCalendar';
@@ -18,6 +18,24 @@ const emptyForm = {
   location: '',
   notes: '',
 };
+
+function getStoredUserName() {
+  try {
+    const userDataStr = localStorage.getItem('rpnzl_user_data');
+    const userData = userDataStr ? JSON.parse(userDataStr) : null;
+    return userData?.name || '';
+  } catch (error) {
+    console.error('Error parsing user data:', error);
+    return '';
+  }
+}
+
+function getInitialForm() {
+  return {
+    ...emptyForm,
+    name: getStoredUserName(),
+  };
+}
 
 const inputClass =
   'h-12 w-full border border-[var(--p-border)] bg-[#f8f6f0] px-4 text-[13px] text-[var(--p-dark)] outline-none transition placeholder:text-[var(--p-muted)]/60 focus:border-[var(--p)]';
@@ -78,8 +96,8 @@ function LoginModal({ onClose, onLogin }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-[rgba(61,31,43,0.42)] px-4 py-8">
-      <div className="relative grid w-full max-w-[1040px] gap-8 bg-white px-7 py-8 shadow-xl md:grid-cols-[0.9fr_1.1fr] md:px-12 md:py-12">
+    <div className="fixed inset-0 z-[80] flex items-center justify-center overflow-y-auto bg-[rgba(61,31,43,0.42)] px-4 py-6">
+      <div className="relative grid max-h-[calc(100vh-48px)] w-full max-w-[1040px] gap-6 overflow-y-auto bg-white px-5 py-7 shadow-xl md:grid-cols-[0.9fr_1.1fr] md:gap-8 md:px-12 md:py-12">
         <button
           type="button"
           onClick={onClose}
@@ -89,8 +107,8 @@ function LoginModal({ onClose, onLogin }) {
           <FiX size={24} />
         </button>
 
-        <div className="flex flex-col justify-center border-b border-[var(--p-border)] pb-8 text-center md:border-b-0 md:border-r md:pb-0 md:pr-10">
-          <p className="text-[18px] leading-relaxed text-[var(--p-mid)]">
+        <div className="flex flex-col justify-center border-b border-[var(--p-border)] pb-6 text-center md:border-b-0 md:border-r md:pb-0 md:pr-10">
+          <p className="text-[16px] leading-relaxed text-[var(--p-mid)] md:text-[18px]">
             Atau Sign In dengan:
           </p>
 
@@ -110,7 +128,7 @@ function LoginModal({ onClose, onLogin }) {
         </div>
 
         <form onSubmit={handleSubmit} className="md:pl-3">
-          <h2 className="font-serif text-[46px] font-light leading-none text-[var(--p-mid)] md:text-[62px]">
+          <h2 className="font-serif text-[38px] font-light leading-none text-[var(--p-mid)] md:text-[62px]">
             Member Sign In
           </h2>
 
@@ -118,7 +136,7 @@ function LoginModal({ onClose, onLogin }) {
             <span className="mb-3 block text-[13px] font-semibold uppercase tracking-[1px] text-[var(--p-mid)]">
               Email
             </span>
-            <div className="flex h-14 items-center border border-[var(--p-mid)] px-4">
+            <div className="flex h-14 items-center border border-[var(--p-mid)] px-3 md:px-4">
               <FiMail className="shrink-0 text-[var(--p)]" size={20} />
               <input
                 required
@@ -136,7 +154,7 @@ function LoginModal({ onClose, onLogin }) {
             <span className="mb-3 block text-[13px] font-semibold uppercase tracking-[1px] text-[var(--p-mid)]">
               Password
             </span>
-            <div className="flex h-14 items-center border border-[var(--p-border)] px-4">
+            <div className="flex h-14 items-center border border-[var(--p-border)] px-3 md:px-4">
               <FiLock className="shrink-0 text-[var(--p)]" size={20} />
               <input
                 required
@@ -172,7 +190,7 @@ export default function Booking() {
     [categories, searchParams],
   );
 
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [activeImageByCategory, setActiveImageByCategory] = useState({});
   const [isLoggedIn, setIsLoggedIn] = useState(
     () => localStorage.getItem('rpnzl_user_login') === 'true',
   );
@@ -181,10 +199,11 @@ export default function Booking() {
   );
   const [selectedSchedule, setSelectedSchedule] = useState(null);
   const [selectedSlotId, setSelectedSlotId] = useState('');
-  const [form, setForm] = useState(emptyForm);
+  const [form, setForm] = useState(getInitialForm);
   const [submitStatus, setSubmitStatus] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const activeImageIndex = activeImageByCategory[category.id] || 0;
   const activeImage = category.images[activeImageIndex] || category.images[0];
   const bookableSlots = useMemo(
     () => (selectedSchedule?.availability.slots || []).filter((slot) => slot.bookable),
@@ -194,28 +213,6 @@ export default function Booking() {
     () => bookableSlots.find((slot) => slot.id === selectedSlotId) || null,
     [bookableSlots, selectedSlotId],
   );
-
-  useEffect(() => {
-    setActiveImageIndex(0);
-  }, [category.id]);
-
-  // Auto-fill name from Google profile if available
-  useEffect(() => {
-    if (isLoggedIn && !form.name) {
-      const userDataStr = localStorage.getItem('rpnzl_user_data');
-      if (userDataStr) {
-        try {
-          const userData = JSON.parse(userDataStr);
-          const userName = userData.name || '';
-          if (userName) {
-            setForm((current) => ({ ...current, name: userName }));
-          }
-        } catch (error) {
-          console.error('Error parsing user data:', error);
-        }
-      }
-    }
-  }, [isLoggedIn]);
 
   const handleSelectDate = useCallback((schedule) => {
     // Check if user is logged in
@@ -232,6 +229,10 @@ export default function Booking() {
       localStorage.setItem('rpnzl_user_login', 'true');
       localStorage.setItem('rpnzl_user_data', JSON.stringify(userData));
       notifyAuthChanged();
+      setForm((current) => ({
+        ...current,
+        name: current.name || userData.name || '',
+      }));
     }
     setIsLoggedIn(true);
     setIsLoginOpen(false);
@@ -345,7 +346,7 @@ export default function Booking() {
       const waUrl = data.wa_url || `https://wa.me/6282114352721`;
 
       // Reset form
-      setForm(emptyForm);
+      setForm(getInitialForm());
       setSelectedSlotId('');
       setSubmitStatus(`✓ Booking ${bookingId} berhasil disimpan ke database admin.`);
       
@@ -371,7 +372,12 @@ export default function Booking() {
                 <button
                   key={image}
                   type="button"
-                  onClick={() => setActiveImageIndex(index)}
+                  onClick={() => {
+                    setActiveImageByCategory((current) => ({
+                      ...current,
+                      [category.id]: index,
+                    }));
+                  }}
                   className={`h-24 w-20 shrink-0 overflow-hidden border bg-white transition md:h-28 md:w-full ${
                     activeImage === image ? 'border-[var(--p)]' : 'border-transparent hover:border-[var(--p-border)]'
                   }`}
@@ -399,11 +405,11 @@ export default function Booking() {
               {category.name}
             </h1>
 
-            <div className="mt-6 flex items-baseline gap-5">
+            <div className="mt-6 flex flex-wrap items-baseline gap-x-5 gap-y-2">
               <span className="font-serif text-[26px] font-semibold text-[var(--p-dark)]">
                 Start from
               </span>
-              <span className="font-serif text-[30px] font-semibold text-[var(--p-mid)]">
+              <span className="font-serif text-[26px] font-semibold text-[var(--p-mid)] md:text-[30px]">
                 {category.price}
               </span>
             </div>

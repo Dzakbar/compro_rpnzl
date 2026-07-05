@@ -1,7 +1,7 @@
 // src/components/layout/Navbar.jsx
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { FiChevronDown, FiLogOut } from 'react-icons/fi';
+import { FiChevronDown, FiLogOut, FiMenu, FiX } from 'react-icons/fi';
 import Button from '../ui/Button';
 import { getHennaCategorySlug } from '../../data/hennaCategories';
 import { useCompanyProfile } from '../../hooks/useCompanyProfile';
@@ -22,13 +22,23 @@ const navLinkClass = ({ isActive }) => `
   }
 `;
 
+const mobileNavLinkClass = ({ isActive }) => `
+  rounded-[6px] px-3 py-3 text-[12px] font-medium uppercase tracking-[1.5px] no-underline transition-colors
+  ${isActive ? 'bg-[var(--p-ultra)] text-[var(--p-mid)]' : 'text-[var(--p-muted)]'}
+`;
+
+const mobileCategoryLinkClass = ({ isActive }) => `
+  rounded-[6px] px-3 py-2 text-[11px] uppercase tracking-[1.2px] no-underline transition-colors
+  ${isActive ? 'bg-[var(--p-ultra)] text-[var(--p-mid)]' : 'text-[var(--p-muted)]'}
+`;
+
 export default function Navbar() {
   const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useAuth();
   const { categories } = useCompanyProfile();
   const [showUserMenu, setShowUserMenu] = useState(false);
-  
-  // Get user's bookings
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   const getUserBookings = () => {
     if (!user) return [];
     const allBookings = getAdminBookings();
@@ -36,26 +46,32 @@ export default function Navbar() {
       booking.customer?.whatsapp === user.phone || booking.customer?.email === user.email
     ));
   };
-  
+
   const userBookings = getUserBookings();
-  const pendingBookings = userBookings.filter(b => b.status === 'pending');
-  const confirmedBookings = userBookings.filter(b => b.status === 'confirmed');
-  
+  const pendingBookings = userBookings.filter((booking) => booking.status === 'pending');
+  const confirmedBookings = userBookings.filter((booking) => booking.status === 'confirmed');
+
   const handleLogout = () => {
     logout();
     setShowUserMenu(false);
+    setIsMobileMenuOpen(false);
     navigate('/');
   };
 
-  const handleOpenUserDashboard = () => {
+  const handleNavigate = (path) => {
     setShowUserMenu(false);
-    navigate('/user/bookings');
+    setIsMobileMenuOpen(false);
+    navigate(path);
   };
-  
+
+  const handleOpenUserDashboard = () => {
+    handleNavigate('/user/bookings');
+  };
+
   const getInitials = (name) => {
     return name
       ?.split(' ')
-      .map(word => word[0])
+      .map((word) => word[0])
       .join('')
       .toUpperCase()
       .slice(0, 2) || '?';
@@ -64,197 +80,297 @@ export default function Navbar() {
   const userContact = user?.phone || user?.email || '';
 
   return (
-    <nav className="
-      flex items-center justify-between px-10 py-4
-      bg-[rgba(253,240,245,0.97)] border-b border-[var(--p-border)]
-      sticky top-0 z-50 backdrop-blur-sm
-    ">
-      <div className="font-serif text-[21px] font-light tracking-[3px] text-[var(--p-mid)]">
-        RPNZL <span className="text-[var(--p)]">Art</span>
+    <nav className="sticky top-0 z-50 border-b border-[var(--p-border)] bg-[rgba(253,240,245,0.97)] backdrop-blur-sm">
+      <div className="flex min-h-[64px] items-center justify-between gap-4 px-5 py-3 md:px-10 md:py-4">
+        <button
+          type="button"
+          onClick={() => handleNavigate('/')}
+          className="shrink-0 text-left font-serif text-[19px] font-light tracking-[3px] text-[var(--p-mid)] md:text-[21px]"
+          aria-label="Ke halaman home"
+        >
+          RPNZL <span className="text-[var(--p)]">Art</span>
+        </button>
+
+        <ul className="hidden list-none gap-7 md:flex">
+          {navItems.slice(0, 2).map((item) => (
+            <li key={item.label}>
+              <NavLink to={item.to} className={navLinkClass}>
+                {item.label}
+              </NavLink>
+            </li>
+          ))}
+
+          <li className="group relative">
+            <NavLink to="/gallery" className={navLinkClass} aria-haspopup="true">
+              <span className="inline-flex items-center gap-1.5">
+                Gallery <FiChevronDown size={13} aria-hidden="true" />
+              </span>
+            </NavLink>
+
+            <div className="invisible absolute left-1/2 top-full z-50 w-[190px] -translate-x-1/2 pt-3 opacity-0 transition duration-200 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+              <div className="border border-[var(--p-border)] bg-white/95 py-2 shadow-[0_18px_45px_rgba(61,31,43,0.12)] backdrop-blur-sm">
+                {categories.map((category) => (
+                  <NavLink
+                    key={category.id}
+                    to={`/gallery/${getHennaCategorySlug(category)}`}
+                    className={({ isActive }) => `
+                      block px-4 py-2.5 text-[11px] uppercase tracking-[1.4px] no-underline transition-colors
+                      ${isActive
+                        ? 'bg-[var(--p-ultra)] text-[var(--p-mid)]'
+                        : 'text-[var(--p-muted)] hover:bg-[var(--p-ultra)] hover:text-[var(--p-mid)]'
+                      }
+                    `}
+                  >
+                    {category.name}
+                  </NavLink>
+                ))}
+              </div>
+            </div>
+          </li>
+
+          {navItems.slice(2).map((item) => (
+            <li key={item.label}>
+              <NavLink to={item.to} className={navLinkClass}>
+                {item.label}
+              </NavLink>
+            </li>
+          ))}
+        </ul>
+
+        <div className="hidden md:block">
+          {isAuthenticated ? (
+            <div className="relative flex items-center gap-2">
+              <UserPill
+                user={user}
+                getInitials={getInitials}
+                onClick={handleOpenUserDashboard}
+              />
+
+              <button
+                type="button"
+                onClick={() => setShowUserMenu((current) => !current)}
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--p)] text-[var(--p-mid)] transition-colors hover:bg-[var(--p-light)]"
+                aria-label="Buka menu user"
+                aria-expanded={showUserMenu}
+              >
+                <FiChevronDown size={15} />
+              </button>
+
+              {showUserMenu && (
+                <div className="absolute right-0 top-full z-50 mt-2 w-[280px] rounded-[6px] border border-[var(--p-border)] bg-white shadow-[0_18px_45px_rgba(61,31,43,0.12)] backdrop-blur-sm">
+                  <UserMenuContent
+                    user={user}
+                    userContact={userContact}
+                    userBookings={userBookings}
+                    pendingBookings={pendingBookings}
+                    confirmedBookings={confirmedBookings}
+                    onOpenDashboard={handleOpenUserDashboard}
+                    onLogout={handleLogout}
+                  />
+                </div>
+              )}
+            </div>
+          ) : (
+            <Button variant="outline" onClick={() => navigate('/booking')}>
+              Login
+            </Button>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setIsMobileMenuOpen((current) => !current)}
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--p-border)] text-[var(--p-mid)] md:hidden"
+          aria-label={isMobileMenuOpen ? 'Tutup menu' : 'Buka menu'}
+          aria-expanded={isMobileMenuOpen}
+        >
+          {isMobileMenuOpen ? <FiX size={20} /> : <FiMenu size={20} />}
+        </button>
       </div>
 
-      <ul className="flex gap-7 list-none">
-        {navItems.slice(0, 2).map((item) => (
-          <li key={item.label}>
-            <NavLink
-              to={item.to}
-              className={navLinkClass}
-            >
-              {item.label}
-            </NavLink>
-          </li>
-        ))}
+      {isMobileMenuOpen && (
+        <div className="border-t border-[var(--p-border)] bg-white/95 px-5 py-5 shadow-[0_18px_45px_rgba(61,31,43,0.10)] md:hidden">
+          <div className="grid gap-2">
+            {[...navItems.slice(0, 2), { label: 'Gallery', to: '/gallery' }, ...navItems.slice(2)].map((item) => (
+              <NavLink
+                key={item.label}
+                to={item.to}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={mobileNavLinkClass}
+              >
+                {item.label}
+              </NavLink>
+            ))}
+          </div>
 
-        <li className="group relative">
-          <NavLink
-            to="/gallery"
-            className={navLinkClass}
-            aria-haspopup="true"
-          >
-            <span className="inline-flex items-center gap-1.5">
-              Gallery <FiChevronDown size={13} aria-hidden="true" />
-            </span>
-          </NavLink>
-
-          <div className="
-            invisible absolute left-1/2 top-full z-50 w-[190px] -translate-x-1/2 pt-3
-            opacity-0 transition duration-200
-            group-hover:visible group-hover:opacity-100
-            group-focus-within:visible group-focus-within:opacity-100
-          ">
-            <div className="border border-[var(--p-border)] bg-white/95 py-2 shadow-[0_18px_45px_rgba(61,31,43,0.12)] backdrop-blur-sm">
+          <div className="mt-4 border-t border-[var(--p-border)] pt-4">
+            <p className="mb-2 px-3 text-[10px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
+              Kategori Gallery
+            </p>
+            <div className="grid gap-1">
               {categories.map((category) => (
                 <NavLink
                   key={category.id}
                   to={`/gallery/${getHennaCategorySlug(category)}`}
-                  className={({ isActive }) => `
-                    block px-4 py-2.5 text-[11px] uppercase tracking-[1.4px] no-underline transition-colors
-                    ${isActive
-                      ? 'bg-[var(--p-ultra)] text-[var(--p-mid)]'
-                      : 'text-[var(--p-muted)] hover:bg-[var(--p-ultra)] hover:text-[var(--p-mid)]'
-                    }
-                  `}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={mobileCategoryLinkClass}
                 >
                   {category.name}
                 </NavLink>
               ))}
             </div>
           </div>
-        </li>
 
-        {navItems.slice(2).map((item) => (
-          <li key={item.label}>
-            <NavLink
-              to={item.to}
-              className={navLinkClass}
-            >
-              {item.label}
-            </NavLink>
-          </li>
-        ))}
-      </ul>
-
-      {isAuthenticated ? (
-        <div className="relative flex items-center gap-2">
-          <button
-            type="button"
-            onClick={handleOpenUserDashboard}
-            className="flex max-w-[180px] items-center gap-2 rounded-full bg-[var(--p)] py-2 pl-2 pr-3 text-white transition-colors hover:bg-[var(--p-light)]"
-            aria-label="Buka halaman user"
-          >
-            {user?.picture ? (
-              <img
-                src={user.picture}
-                alt=""
-                className="h-8 w-8 rounded-full object-cover"
-              />
+          <div className="mt-4 border-t border-[var(--p-border)] pt-4">
+            {isAuthenticated ? (
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={handleOpenUserDashboard}
+                  className="flex w-full items-center gap-3 rounded-[8px] bg-[var(--p-ultra)] px-3 py-3 text-left"
+                >
+                  {user?.picture ? (
+                    <img src={user.picture} alt="" className="h-9 w-9 rounded-full object-cover" />
+                  ) : (
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--p-mid)] text-[12px] font-bold text-white">
+                      {getInitials(user?.name)}
+                    </span>
+                  )}
+                  <span className="min-w-0">
+                    <span className="block truncate text-[13px] font-medium text-[var(--p-dark)]">
+                      {user?.name || 'User'}
+                    </span>
+                    <span className="block truncate text-[11px] text-[var(--p-muted)]">
+                      {userContact}
+                    </span>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="flex w-full items-center justify-center gap-2 rounded-[6px] border border-red-200 bg-red-50 px-4 py-3 text-[11px] font-semibold uppercase tracking-[1px] text-red-600"
+                >
+                  <FiLogOut size={14} />
+                  Logout
+                </button>
+              </div>
             ) : (
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--p-mid)] text-[12px] font-bold">
-                {getInitials(user?.name)}
-              </div>
+              <Button variant="outline" onClick={() => handleNavigate('/booking')} className="w-full">
+                Login
+              </Button>
             )}
-            <span className="hidden truncate text-[11px] font-medium uppercase tracking-[1px] sm:inline">
-              {user?.name?.split(' ')[0] || 'User'}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setShowUserMenu(!showUserMenu)}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--p)] text-[var(--p-mid)] transition-colors hover:bg-[var(--p-light)]"
-            aria-label="Buka menu user"
-            aria-expanded={showUserMenu}
-          >
-            <FiChevronDown size={15} />
-          </button>
-
-          {showUserMenu && (
-            <div className="absolute right-0 top-full mt-2 w-[280px] rounded-[6px] border border-[var(--p-border)] bg-white shadow-[0_18px_45px_rgba(61,31,43,0.12)] backdrop-blur-sm z-50">
-              {/* User Info Header */}
-              <div className="border-b border-[var(--p-border)] px-4 py-4">
-                <p className="text-[11px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
-                  Akun Anda
-                </p>
-                <p className="mt-2 text-[13px] font-serif text-[var(--p-dark)]">
-                  {user?.name}
-                </p>
-                <p className="text-[11px] text-[var(--p-muted)]">
-                  {userContact}
-                </p>
-              </div>
-
-              {/* Booking Status */}
-              <div className="border-b border-[var(--p-border)] px-4 py-4">
-                <p className="text-[10px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)] mb-3">
-                  Status Booking
-                </p>
-                
-                {userBookings.length === 0 ? (
-                  <p className="text-[11px] text-[var(--p-muted)]">
-                    Belum ada booking
-                  </p>
-                ) : (
-                  <div className="space-y-2">
-                    {/* Pending Bookings */}
-                    {pendingBookings.length > 0 && (
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
-                        <span className="text-[11px] text-[var(--p-muted)]">
-                          {pendingBookings.length} Pending
-                        </span>
-                      </div>
-                    )}
-                    
-                    {/* Confirmed Bookings */}
-                    {confirmedBookings.length > 0 && (
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                        <span className="text-[11px] text-[var(--p-muted)]">
-                          {confirmedBookings.length} Confirmed
-                        </span>
-                      </div>
-                    )}
-
-                    <div className="mt-3 text-[10px] text-[var(--p-muted)] space-y-1">
-                      {userBookings.slice(0, 3).map((booking) => (
-                        <div key={booking.id} className="rounded px-2 py-1 bg-[var(--p-ultra)]">
-                          <p className="font-medium text-[var(--p-dark)]">
-                            {booking.category.name}
-                          </p>
-                          <p className="text-[9px] text-[var(--p-muted)]">
-                            {booking.schedule.dateLabel} • {booking.schedule.slot}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-               {/* Actions */}
-               <div className="px-4 py-3 space-y-2">
-                 <button
-                   onClick={handleOpenUserDashboard}
-                   className="w-full text-left px-3 py-2 rounded text-[11px] font-medium uppercase tracking-[1px] text-[var(--p-mid)] hover:bg-[var(--p-ultra)] transition-colors"
-                 >
-                   Lihat Booking
-                 </button>
-                 <button
-                   onClick={handleLogout}
-                   className="w-full flex items-center gap-2 px-3 py-2 rounded text-[11px] font-medium uppercase tracking-[1px] text-red-600 hover:bg-red-50 transition-colors"
-                 >
-                   <FiLogOut size={12} />
-                   Logout
-                 </button>
-               </div>
-            </div>
-          )}
+          </div>
         </div>
-      ) : (
-        <Button variant="outline" onClick={() => navigate('/booking')}>
-          Login
-        </Button>
       )}
     </nav>
+  );
+}
+
+function UserPill({ user, getInitials, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex max-w-[180px] items-center gap-2 rounded-full bg-[var(--p)] py-2 pl-2 pr-3 text-white transition-colors hover:bg-[var(--p-light)]"
+      aria-label="Buka halaman user"
+    >
+      {user?.picture ? (
+        <img src={user.picture} alt="" className="h-8 w-8 rounded-full object-cover" />
+      ) : (
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--p-mid)] text-[12px] font-bold">
+          {getInitials(user?.name)}
+        </div>
+      )}
+      <span className="truncate text-[11px] font-medium uppercase tracking-[1px]">
+        {user?.name?.split(' ')[0] || 'User'}
+      </span>
+    </button>
+  );
+}
+
+function UserMenuContent({
+  user,
+  userContact,
+  userBookings,
+  pendingBookings,
+  confirmedBookings,
+  onOpenDashboard,
+  onLogout,
+}) {
+  return (
+    <>
+      <div className="border-b border-[var(--p-border)] px-4 py-4">
+        <p className="text-[11px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
+          Akun Anda
+        </p>
+        <p className="mt-2 text-[13px] font-serif text-[var(--p-dark)]">
+          {user?.name}
+        </p>
+        <p className="break-words text-[11px] text-[var(--p-muted)]">
+          {userContact}
+        </p>
+      </div>
+
+      <div className="border-b border-[var(--p-border)] px-4 py-4">
+        <p className="mb-3 text-[10px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
+          Status Booking
+        </p>
+
+        {userBookings.length === 0 ? (
+          <p className="text-[11px] text-[var(--p-muted)]">
+            Belum ada booking
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {pendingBookings.length > 0 && (
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-yellow-500" />
+                <span className="text-[11px] text-[var(--p-muted)]">
+                  {pendingBookings.length} Pending
+                </span>
+              </div>
+            )}
+
+            {confirmedBookings.length > 0 && (
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-green-500" />
+                <span className="text-[11px] text-[var(--p-muted)]">
+                  {confirmedBookings.length} Confirmed
+                </span>
+              </div>
+            )}
+
+            <div className="mt-3 space-y-1 text-[10px] text-[var(--p-muted)]">
+              {userBookings.slice(0, 3).map((booking) => (
+                <div key={booking.id} className="rounded bg-[var(--p-ultra)] px-2 py-1">
+                  <p className="font-medium text-[var(--p-dark)]">
+                    {booking.category.name}
+                  </p>
+                  <p className="text-[9px] text-[var(--p-muted)]">
+                    {booking.schedule.dateLabel} - {booking.schedule.slot}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-2 px-4 py-3">
+        <button
+          onClick={onOpenDashboard}
+          className="w-full rounded px-3 py-2 text-left text-[11px] font-medium uppercase tracking-[1px] text-[var(--p-mid)] transition-colors hover:bg-[var(--p-ultra)]"
+        >
+          Lihat Booking
+        </button>
+        <button
+          onClick={onLogout}
+          className="flex w-full items-center gap-2 rounded px-3 py-2 text-[11px] font-medium uppercase tracking-[1px] text-red-600 transition-colors hover:bg-red-50"
+        >
+          <FiLogOut size={12} />
+          Logout
+        </button>
+      </div>
+    </>
   );
 }

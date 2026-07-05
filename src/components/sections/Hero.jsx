@@ -22,7 +22,7 @@ export default function Hero() {
   }, [prefersReducedMotion]);
 
   return (
-    <section className="relative min-h-[500px] flex items-center justify-center text-center bg-[var(--p-dark)] overflow-hidden">
+    <section className="relative flex min-h-[520px] items-center justify-center overflow-hidden bg-[var(--p-dark)] text-center md:min-h-[500px]">
       <AnimatePresence initial={false}>
         <motion.img
           key={heroPhotos[activePhoto]}
@@ -40,31 +40,31 @@ export default function Hero() {
       <div className="absolute inset-0 bg-gradient-to-b from-[rgba(61,31,43,0.24)] via-[rgba(61,31,43,0.4)] to-[rgba(61,31,43,0.72)]" />
 
       <motion.div
-        className="relative z-10 px-10 py-20 max-w-[560px] mx-auto"
+        className="relative z-10 mx-auto max-w-[560px] px-5 py-20 sm:px-10"
         initial={{ opacity: 0, y: 28 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
       >
         <motion.p
-          className="text-[10px] tracking-[4px] uppercase text-[var(--p-light)] mb-3.5 opacity-80"
+          className="mb-3.5 text-[10px] uppercase tracking-[3px] text-[var(--p-light)] opacity-80 sm:tracking-[4px]"
           initial={{ opacity: 0 }} animate={{ opacity: 0.8 }} transition={{ delay: 0.2, duration: 0.5 }}
         >
           &#10022; Henna Art & Beauty
         </motion.p>
 
         <motion.h1
-          className="font-serif text-[54px] font-light text-[#FDF0F5] leading-[1.1] mb-4"
+          className="mb-4 font-serif text-[42px] font-light leading-[1.08] text-[#FDF0F5] sm:text-[54px]"
           initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.6 }}
         >
           Crafted with <em className="italic text-[var(--p)]">love,</em><br />worn on skin
         </motion.h1>
 
         <motion.div
-          className="mt-8 flex gap-3.5 justify-center"
+          className="mt-8 flex flex-col justify-center gap-3.5 sm:flex-row"
           initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55, duration: 0.5 }}
         >
-          <Button variant="primary">Book a Session</Button>
-          <Button variant="ghost">View Gallery</Button>
+          <Button variant="primary" className="w-full sm:w-auto">Book a Session</Button>
+          <Button variant="ghost" className="w-full sm:w-auto">View Gallery</Button>
         </motion.div>
 
         <motion.div
