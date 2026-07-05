@@ -1,5 +1,19 @@
 const PRODUCTION_API_BASE_URL = 'https://admin-rpnzl.vercel.app';
 
+function removeTrailingSlash(url) {
+  return url.replace(/\/+$/, '');
+}
+
+function normalizeApiBaseUrl(url) {
+  const normalizedUrl = removeTrailingSlash(url);
+
+  if (normalizedUrl.endsWith('/api')) {
+    return normalizedUrl.slice(0, -4);
+  }
+
+  return normalizedUrl;
+}
+
 function isLoopbackUrl(url) {
   if (!url) return false;
 
@@ -18,5 +32,20 @@ export function getApiBaseUrl() {
     return PRODUCTION_API_BASE_URL;
   }
 
-  return configuredUrl.replace(/\/$/, '');
+  const normalizedUrl = normalizeApiBaseUrl(configuredUrl);
+
+  if (import.meta.env.PROD) {
+    try {
+      const parsed = new URL(normalizedUrl);
+      const usesAdminBackend = parsed.hostname === 'admin-rpnzl.vercel.app';
+
+      if (usesAdminBackend) {
+        return PRODUCTION_API_BASE_URL;
+      }
+    } catch {
+      return normalizedUrl;
+    }
+  }
+
+  return normalizedUrl;
 }
