@@ -2,13 +2,14 @@
 import { GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { FiCalendar, FiLock, FiMail, FiStar, FiX } from 'react-icons/fi';
+import { FiCalendar, FiLock, FiMail, FiPhone, FiStar, FiUser, FiX } from 'react-icons/fi';
 import { useSearchParams } from 'react-router-dom';
 import AvailabilityCalendar from '../components/sections/AvailabilityCalendar';
 import TestimonialFormModal from '../components/testimonials/TestimonialFormModal';
 import { notifyAuthChanged } from '../hooks/useAuth';
 import { getCompanyProfileCategory, useCompanyProfile } from '../hooks/useCompanyProfile';
 import { getApiBaseUrl } from '../lib/apiBaseUrl';
+import { loginCustomer, loginGoogleCustomer, registerCustomer } from '../lib/authApi';
 import { fetchTestimonials } from '../lib/testimonialsApi';
 import { createOwnerWhatsAppUrl } from '../data/bookingConfig';
 
@@ -21,17 +22,6 @@ const emptyForm = {
   location: '',
   notes: '',
 };
-
-function getStoredUserName() {
-  try {
-    const userDataStr = localStorage.getItem('rpnzl_user_data');
-    const userData = userDataStr ? JSON.parse(userDataStr) : null;
-    return userData?.name || '';
-  } catch (error) {
-    console.error('Error parsing user data:', error);
-    return '';
-  }
-}
 
 function getStoredUser() {
   try {
@@ -48,10 +38,27 @@ function normalizePackageName(value) {
 }
 
 function getInitialForm() {
+  const storedUser = getStoredUser();
+
   return {
     ...emptyForm,
-    name: getStoredUserName(),
+    name: storedUser?.name || '',
+    whatsapp: storedUser?.whatsapp_number || storedUser?.phone || '',
   };
+}
+
+function storeCustomerAuth(userData) {
+  const normalizedUser = {
+    ...userData,
+    phone: userData.phone || userData.whatsapp_number || '',
+    whatsapp_number: userData.whatsapp_number || userData.phone || '',
+  };
+
+  localStorage.setItem('rpnzl_user_login', 'true');
+  localStorage.setItem('rpnzl_user_data', JSON.stringify(normalizedUser));
+  notifyAuthChanged();
+
+  return normalizedUser;
 }
 
 function buildWhatsAppMessage(booking) {
@@ -79,55 +86,88 @@ const textareaClass =
   'min-h-[104px] w-full border border-[var(--p-border)] bg-[#f8f6f0] px-4 py-3 text-[16px] text-[var(--p-dark)] outline-none transition placeholder:text-[var(--p-muted)]/60 focus:border-[var(--p)]';
 
 function LoginModal({ onClose, onLogin }) {
+  const [mode, setMode] = useState('login');
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [loginError, setLoginError] = useState('');
+  const [registerForm, setRegisterForm] = useState({
+    name: '',
+    email: '',
+    whatsapp_number: '',
+    password: '',
+    password_confirmation: '',
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [authError, setAuthError] = useState('');
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    // Email/password login - optional fallback
-    setIsLoggingIn(true);
-    // Simulate email login
-    setTimeout(() => {
-      const userData = {
-        name: loginForm.email.split('@')[0],
-        email: loginForm.email,
-        provider: 'email',
-      };
-      localStorage.setItem('rpnzl_user_login', 'true');
-      localStorage.setItem('rpnzl_user_data', JSON.stringify(userData));
-      notifyAuthChanged();
-      onLogin(userData);
-      setIsLoggingIn(false);
-    }, 500);
-  };
+  const isRegister = mode === 'register';
 
-  const handleChange = (event) => {
+  const handleLoginChange = (event) => {
     const { name, value } = event.target;
     setLoginForm((current) => ({ ...current, [name]: value }));
   };
 
-  const handleGoogleSuccess = (credentialResponse) => {
+  const handleRegisterChange = (event) => {
+    const { name, value } = event.target;
+    setRegisterForm((current) => ({ ...current, [name]: value }));
+  };
+
+  const handleAuthSuccess = (userData) => {
+    const storedUser = storeCustomerAuth(userData);
+    onLogin(storedUser);
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setAuthError('');
+    setIsSubmitting(true);
+
+    try {
+      const result = isRegister
+        ? await registerCustomer({
+            name: registerForm.name.trim(),
+            email: registerForm.email.trim(),
+            whatsapp_number: registerForm.whatsapp_number.trim(),
+            password: registerForm.password,
+            password_confirmation: registerForm.password_confirmation,
+          })
+        : await loginCustomer({
+            email: loginForm.email.trim(),
+            password: loginForm.password,
+          });
+
+      handleAuthSuccess(result.user);
+    } catch (error) {
+      setAuthError(error.message || 'Auth gagal diproses.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setAuthError('');
+    setIsSubmitting(true);
+
     try {
       const decoded = jwtDecode(credentialResponse.credential);
-      const userData = {
+      const result = await loginGoogleCustomer({
         name: decoded.name,
         email: decoded.email,
         picture: decoded.picture,
-        provider: 'google',
-      };
-      localStorage.setItem('rpnzl_user_login', 'true');
-      localStorage.setItem('rpnzl_user_data', JSON.stringify(userData));
-      notifyAuthChanged();
-      onLogin(userData);
+      });
+
+      handleAuthSuccess({
+        ...result.user,
+        picture: decoded.picture,
+      });
     } catch (error) {
-      console.error('Failed to decode Google token:', error);
-      setLoginError('Gagal login dengan Google');
+      console.error('Failed to login with Google:', error);
+      setAuthError(error.message || 'Gagal login dengan Google.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleGoogleError = () => {
-    setLoginError('Gagal login dengan Google');
+    setAuthError('Gagal login dengan Google.');
   };
 
   return (
@@ -144,7 +184,7 @@ function LoginModal({ onClose, onLogin }) {
 
         <div className="flex flex-col justify-center border-b border-[var(--p-border)] pb-6 text-center md:border-b-0 md:border-r md:pb-0 md:pr-10">
           <p className="text-[16px] leading-relaxed text-[var(--p-mid)] md:text-[18px]">
-            Atau Sign In dengan:
+            Masuk dengan Google
           </p>
 
           <div className="mt-7 flex items-center justify-center">
@@ -157,17 +197,56 @@ function LoginModal({ onClose, onLogin }) {
             />
           </div>
 
-          {loginError && (
-            <p className="mt-4 text-[15px] text-red-500">{loginError}</p>
+          <div className="mt-7 flex justify-center gap-2">
+            {['login', 'register'].map((item) => (
+              <button
+                key={item}
+                type="button"
+                onClick={() => {
+                  setMode(item);
+                  setAuthError('');
+                }}
+                className={`h-10 border px-4 text-[13px] font-semibold uppercase tracking-[1.2px] transition ${
+                  mode === item
+                    ? 'border-[var(--p)] bg-[var(--p)] text-white'
+                    : 'border-[var(--p-border)] text-[var(--p-mid)] hover:bg-[var(--p-ultra)]'
+                }`}
+              >
+                {item === 'login' ? 'Login' : 'Register'}
+              </button>
+            ))}
+          </div>
+
+          {authError && (
+            <p className="mt-4 text-[15px] leading-relaxed text-red-500">{authError}</p>
           )}
         </div>
 
         <form onSubmit={handleSubmit} className="md:pl-3">
           <h2 className="font-serif text-[38px] font-light leading-none text-[var(--p-mid)] md:text-[62px]">
-            Member Sign In
+            {isRegister ? 'Member Register' : 'Member Sign In'}
           </h2>
 
-          <label className="mt-8 block">
+          {isRegister && (
+            <label className="mt-8 block">
+              <span className="mb-3 block text-[15px] font-semibold uppercase tracking-[1px] text-[var(--p-mid)]">
+                Nama
+              </span>
+              <div className="flex h-14 items-center border border-[var(--p-mid)] px-3 md:px-4">
+                <FiUser className="shrink-0 text-[var(--p)]" size={20} />
+                <input
+                  required
+                  name="name"
+                  value={registerForm.name}
+                  onChange={handleRegisterChange}
+                  className="h-full min-w-0 flex-1 bg-transparent px-4 text-[16px] text-[var(--p-dark)] outline-none placeholder:text-[var(--p-muted)]"
+                  placeholder="Nama lengkap"
+                />
+              </div>
+            </label>
+          )}
+
+          <label className={isRegister ? 'mt-5 block' : 'mt-8 block'}>
             <span className="mb-3 block text-[15px] font-semibold uppercase tracking-[1px] text-[var(--p-mid)]">
               Email
             </span>
@@ -177,13 +256,32 @@ function LoginModal({ onClose, onLogin }) {
                 required
                 type="email"
                 name="email"
-                value={loginForm.email}
-                onChange={handleChange}
+                value={isRegister ? registerForm.email : loginForm.email}
+                onChange={isRegister ? handleRegisterChange : handleLoginChange}
                 className="h-full min-w-0 flex-1 bg-transparent px-4 text-[16px] text-[var(--p-dark)] outline-none placeholder:text-[var(--p-muted)]"
-                placeholder="Your email"
+                placeholder="nama@email.com"
               />
             </div>
           </label>
+
+          {isRegister && (
+            <label className="mt-5 block">
+              <span className="mb-3 block text-[15px] font-semibold uppercase tracking-[1px] text-[var(--p-mid)]">
+                WhatsApp
+              </span>
+              <div className="flex h-14 items-center border border-[var(--p-border)] px-3 md:px-4">
+                <FiPhone className="shrink-0 text-[var(--p)]" size={20} />
+                <input
+                  required
+                  name="whatsapp_number"
+                  value={registerForm.whatsapp_number}
+                  onChange={handleRegisterChange}
+                  className="h-full min-w-0 flex-1 bg-transparent px-4 text-[16px] text-[var(--p-dark)] outline-none placeholder:text-[var(--p-muted)]"
+                  placeholder="08xxxxxxxxxx"
+                />
+              </div>
+            </label>
+          )}
 
           <label className="mt-5 block">
             <span className="mb-3 block text-[15px] font-semibold uppercase tracking-[1px] text-[var(--p-mid)]">
@@ -195,20 +293,40 @@ function LoginModal({ onClose, onLogin }) {
                 required
                 type="password"
                 name="password"
-                value={loginForm.password}
-                onChange={handleChange}
+                value={isRegister ? registerForm.password : loginForm.password}
+                onChange={isRegister ? handleRegisterChange : handleLoginChange}
                 className="h-full min-w-0 flex-1 bg-transparent px-4 text-[16px] text-[var(--p-dark)] outline-none placeholder:text-[var(--p-muted)]"
-                placeholder="Your password"
+                placeholder="Minimal 8 karakter"
               />
             </div>
           </label>
 
+          {isRegister && (
+            <label className="mt-5 block">
+              <span className="mb-3 block text-[15px] font-semibold uppercase tracking-[1px] text-[var(--p-mid)]">
+                Konfirmasi Password
+              </span>
+              <div className="flex h-14 items-center border border-[var(--p-border)] px-3 md:px-4">
+                <FiLock className="shrink-0 text-[var(--p)]" size={20} />
+                <input
+                  required
+                  type="password"
+                  name="password_confirmation"
+                  value={registerForm.password_confirmation}
+                  onChange={handleRegisterChange}
+                  className="h-full min-w-0 flex-1 bg-transparent px-4 text-[16px] text-[var(--p-dark)] outline-none placeholder:text-[var(--p-muted)]"
+                  placeholder="Ulangi password"
+                />
+              </div>
+            </label>
+          )}
+
           <button
             type="submit"
-            disabled={isLoggingIn}
+            disabled={isSubmitting}
             className="mt-8 h-14 w-full bg-[var(--p)] text-[15px] font-semibold uppercase tracking-[1.8px] text-white transition hover:bg-[var(--p-deep)] disabled:opacity-50"
           >
-            {isLoggingIn ? 'Signing in...' : 'Sign in'}
+            {isSubmitting ? 'Memproses...' : isRegister ? 'Register' : 'Sign in'}
           </button>
         </form>
       </div>
@@ -373,6 +491,7 @@ export default function Booking() {
       setForm((current) => ({
         ...current,
         name: current.name || userData.name || '',
+        whatsapp: current.whatsapp || userData.whatsapp_number || userData.phone || '',
       }));
     }
     setIsLoggedIn(true);
