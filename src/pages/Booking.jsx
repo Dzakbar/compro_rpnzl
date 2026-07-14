@@ -1,13 +1,16 @@
 // src/pages/Booking.jsx
 import { GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FiCalendar, FiLock, FiMail, FiStar, FiX } from 'react-icons/fi';
 import { useSearchParams } from 'react-router-dom';
 import AvailabilityCalendar from '../components/sections/AvailabilityCalendar';
+import TestimonialFormModal from '../components/testimonials/TestimonialFormModal';
 import { notifyAuthChanged } from '../hooks/useAuth';
 import { getCompanyProfileCategory, useCompanyProfile } from '../hooks/useCompanyProfile';
 import { getApiBaseUrl } from '../lib/apiBaseUrl';
+import { fetchTestimonials } from '../lib/testimonialsApi';
+import { createOwnerWhatsAppUrl } from '../data/bookingConfig';
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -30,11 +33,43 @@ function getStoredUserName() {
   }
 }
 
+function getStoredUser() {
+  try {
+    const userDataStr = localStorage.getItem('rpnzl_user_data');
+    return userDataStr ? JSON.parse(userDataStr) : null;
+  } catch (error) {
+    console.error('Error parsing user data:', error);
+    return null;
+  }
+}
+
+function normalizePackageName(value) {
+  return String(value || '').trim().toLowerCase();
+}
+
 function getInitialForm() {
   return {
     ...emptyForm,
     name: getStoredUserName(),
   };
+}
+
+function buildWhatsAppMessage(booking) {
+  return [
+    'Halo RPNZL Art, saya ingin booking henna.',
+    '',
+    `Booking ID: ${booking.id}`,
+    `Kategori: ${booking.category.name}`,
+    `Harga: ${booking.category.price}`,
+    `Tanggal: ${booking.schedule.dateLabel}`,
+    `Jam: ${booking.schedule.slot}`,
+    '',
+    `Nama: ${booking.customer.name}`,
+    `WhatsApp: ${booking.customer.whatsapp}`,
+    `Acara: ${booking.customer.eventType}`,
+    `Lokasi: ${booking.customer.location}`,
+    `Catatan: ${booking.customer.notes || '-'}`,
+  ].join('\n');
 }
 
 const inputClass =
@@ -202,6 +237,12 @@ export default function Booking() {
   const [form, setForm] = useState(getInitialForm);
   const [submitStatus, setSubmitStatus] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [completedBooking, setCompletedBooking] = useState(null);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [reviewPromptStatus, setReviewPromptStatus] = useState('');
+  const [reviewSummary, setReviewSummary] = useState({ average: 0, total: 0 });
+  const [isBookingEligibilityLoading, setIsBookingEligibilityLoading] = useState(false);
 
   const activeImageIndex = activeImageByCategory[category.id] || 0;
   const activeImage = category.images[activeImageIndex] || category.images[0];
@@ -213,6 +254,106 @@ export default function Booking() {
     () => bookableSlots.find((slot) => slot.id === selectedSlotId) || null,
     [bookableSlots, selectedSlotId],
   );
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    async function loadReviewSummary() {
+      if (!category.packageId) {
+        setReviewSummary({ average: 0, total: 0 });
+        return;
+      }
+
+      try {
+        const result = await fetchTestimonials({ limit: 24 });
+        const categoryName = normalizePackageName(category.name);
+        const categoryReviews = (result.data || []).filter(
+          (testimonial) => normalizePackageName(testimonial.package_name) === categoryName,
+        );
+        const ratingTotal = categoryReviews.reduce(
+          (total, testimonial) => total + Number(testimonial.rating || 0),
+          0,
+        );
+
+        if (!isCancelled) {
+          setReviewSummary({
+            average: categoryReviews.length ? ratingTotal / categoryReviews.length : 0,
+            total: categoryReviews.length,
+          });
+        }
+      } catch (error) {
+        console.error('Failed to load booking rating summary:', error);
+      }
+    }
+
+    loadReviewSummary();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [category.name, category.packageId]);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    async function loadEligibleBooking() {
+      const storedUser = getStoredUser();
+
+      if (!isLoggedIn || !storedUser?.email || !category.packageId) {
+        return;
+      }
+
+      setIsBookingEligibilityLoading(true);
+
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/api/user/bookings?email=${encodeURIComponent(storedUser.email)}`,
+          { headers: { Accept: 'application/json' } },
+        );
+
+        if (!response.ok) {
+          throw new Error(`Booking API ${response.status}`);
+        }
+
+        const data = await response.json();
+        const categoryName = normalizePackageName(category.name);
+        const matchingBookings = (data.bookings || []).filter(
+          (booking) =>
+            (booking.package_id === category.packageId ||
+              normalizePackageName(booking.package_name) === categoryName) &&
+            booking.status !== 'rejected',
+        );
+        const eligibleBooking = matchingBookings.find((booking) => !booking.has_testimonial);
+
+        if (!isCancelled && eligibleBooking) {
+          setCompletedBooking({
+            id: eligibleBooking.id,
+            packageId: eligibleBooking.package_id,
+            packageName: eligibleBooking.package_name || category.name,
+            customer: {
+              name: eligibleBooking.customer_name || storedUser.name || '',
+              email: storedUser.email,
+              whatsapp_number: storedUser.whatsapp_number || storedUser.phone || '',
+            },
+          });
+        } else if (!isCancelled && matchingBookings.some((booking) => booking.has_testimonial)) {
+          setReviewPromptStatus('Testimoni untuk booking kategori ini sudah pernah dikirim.');
+        }
+      } catch (error) {
+        console.error('Failed to check rating eligibility:', error);
+      } finally {
+        if (!isCancelled) {
+          setIsBookingEligibilityLoading(false);
+        }
+      }
+    }
+
+    loadEligibleBooking();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [category.name, category.packageId, isLoggedIn]);
 
   const handleSelectDate = useCallback((schedule) => {
     // Check if user is logged in
@@ -243,9 +384,38 @@ export default function Booking() {
     setForm((current) => ({ ...current, [name]: value }));
   };
 
+  const handleBookingRating = (rating) => {
+    setReviewRating(rating);
+
+    if (!completedBooking) {
+      if (!isLoggedIn) {
+        setReviewPromptStatus('Silakan sign in dan selesaikan booking kategori ini terlebih dahulu.');
+        setIsLoginOpen(true);
+        return;
+      }
+
+      setReviewPromptStatus(
+        isBookingEligibilityLoading
+          ? 'Sedang memeriksa data booking Anda...'
+          : 'Selesaikan booking kategori ini terlebih dahulu sebelum memberi rating.',
+      );
+      return;
+    }
+
+    if (rating >= 4) {
+      setReviewPromptStatus('Terima kasih. Ceritakan pengalaman Anda agar bisa tampil di halaman utama.');
+      setIsReviewModalOpen(true);
+      return;
+    }
+
+    setReviewPromptStatus('Terima kasih sudah memberi rating. Masukan Anda membantu kami memperbaiki layanan.');
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setSubmitStatus('');
+    setReviewRating(0);
+    setReviewPromptStatus('');
 
     if (!isLoggedIn) {
       setIsLoginOpen(true);
@@ -341,16 +511,49 @@ export default function Booking() {
         return;
       }
 
-      // Success - get booking data from response
-      const bookingId = data.booking?.id || 'unknown';
-      const waUrl = data.wa_url || `https://wa.me/6282114352721`;
+      // Success - keep the real backend booking id so testimonial validation can link to it.
+      const bookingId = data.booking?.id || null;
+      const booking = {
+        id: bookingId || `RPNZL-${Date.now()}`,
+        category: {
+          name: category.name,
+          price: category.price,
+        },
+        schedule: {
+          dateLabel: selectedSchedule.dateLabel,
+          slot: selectedSlot.time,
+        },
+        customer: {
+          name: form.name,
+          whatsapp: form.whatsapp,
+          eventType: form.eventType,
+          location: form.location,
+          notes: form.notes,
+        },
+      };
+
+      const completedBookingData = {
+        id: bookingId,
+        packageId: category.packageId,
+        packageName: category.name,
+        customer: {
+          name: form.name,
+          email: userEmail,
+          whatsapp_number: form.whatsapp,
+        },
+      };
 
       // Reset form
+      setCompletedBooking(completedBookingData);
       setForm(getInitialForm());
       setSelectedSlotId('');
-      setSubmitStatus(`✓ Booking ${bookingId} berhasil disimpan ke database admin.`);
+      setSubmitStatus(
+        'Booking berhasil dikirim! Detail bookingmu sudah kami terima. Silakan lanjutkan konfirmasi melalui WhatsApp.',
+      );
       
-      // Open WhatsApp to notify owner
+      // Build WhatsApp message and open immediately
+      const fallbackMessage = buildWhatsAppMessage(booking);
+      const waUrl = data.wa_url || createOwnerWhatsAppUrl(fallbackMessage);
       setTimeout(() => {
         window.open(waUrl, '_blank', 'noopener,noreferrer');
       }, 1000);
@@ -414,12 +617,38 @@ export default function Booking() {
               </span>
             </div>
 
-            <div className="mt-6 flex items-center gap-2 text-[var(--p-deep)]">
-              {Array.from({ length: 5 }, (_, index) => (
-                <FiStar key={index} size={22} />
-              ))}
-              <span className="ml-2 text-[12px] text-[var(--p-muted)]">(No review yet)</span>
+            <div className="mt-6 flex items-center gap-2">
+              {Array.from({ length: 5 }, (_, index) => {
+                const rating = index + 1;
+                const displayedRating = reviewRating || Math.round(reviewSummary.average);
+                const isActive = rating <= displayedRating;
+
+                return (
+                  <button
+                    key={rating}
+                    type="button"
+                    onClick={() => handleBookingRating(rating)}
+                    className={`flex h-8 w-8 items-center justify-center transition ${
+                      isActive ? 'text-[var(--p-deep)]' : 'text-[var(--p-muted)]'
+                    } hover:text-[var(--p-deep)]`}
+                    aria-label={`${rating} bintang`}
+                  >
+                    <FiStar size={24} fill={isActive ? 'currentColor' : 'none'} />
+                  </button>
+                );
+              })}
+              <span className="ml-2 text-[12px] text-[var(--p-muted)]">
+                {reviewSummary.total > 0
+                  ? `${reviewSummary.average.toFixed(1)} (${reviewSummary.total} review)`
+                  : 'Belum ada review'}
+              </span>
             </div>
+
+            {reviewPromptStatus && (
+              <p className="mt-2 text-[12px] leading-relaxed text-[var(--p-mid)]" role="status">
+                {reviewPromptStatus}
+              </p>
+            )}
 
             <div className="mt-7 border-y border-[var(--p-border)] py-5">
               <p className="text-[13px] font-semibold uppercase tracking-[1px] text-[var(--p-mid)]">
@@ -606,8 +835,23 @@ export default function Booking() {
                 )}
 
                 {submitStatus && (
-                  <div className="rounded-[6px] border border-dashed border-amber-300 bg-amber-50 p-4">
-                    <p className="text-[12px] leading-relaxed text-amber-900">{submitStatus}</p>
+                  <div
+                    className={`rounded-[6px] border p-4 ${
+                      submitStatus.startsWith('Booking berhasil')
+                        ? 'border-emerald-200 bg-emerald-50'
+                        : 'border-dashed border-amber-300 bg-amber-50'
+                    }`}
+                    role="status"
+                  >
+                    <p
+                      className={`text-[12px] leading-relaxed ${
+                        submitStatus.startsWith('Booking berhasil')
+                          ? 'text-emerald-900'
+                          : 'text-amber-900'
+                      }`}
+                    >
+                      {submitStatus}
+                    </p>
                     {submitStatus.includes('Email Anda tidak ditemukan') && (
                       <button
                         type="button"
@@ -622,6 +866,43 @@ export default function Booking() {
                     )}
                   </div>
                 )}
+
+                {completedBooking && (
+                  <div className="border border-[var(--p-border)] bg-[var(--p-ultra)] p-5">
+                    <p className="text-[12px] font-semibold uppercase tracking-[1.4px] text-[var(--p-mid)]">
+                      Rating pengalaman booking
+                    </p>
+                    <p className="mt-2 text-[12px] leading-relaxed text-[var(--p-muted)]">
+                      Beri rating untuk pengalaman booking Anda. Rating 4 atau 5 akan membuka form testimoni.
+                    </p>
+                    <div className="mt-4 flex items-center gap-1.5">
+                      {Array.from({ length: 5 }, (_, index) => {
+                        const rating = index + 1;
+                        const isActive = rating <= reviewRating;
+
+                        return (
+                          <button
+                            key={rating}
+                            type="button"
+                            onClick={() => handleBookingRating(rating)}
+                            className={`flex h-10 w-10 items-center justify-center transition ${
+                              isActive ? 'text-[var(--p-deep)]' : 'text-[var(--p-border)]'
+                            }`}
+                            aria-label={`${rating} bintang`}
+                          >
+                            <FiStar size={23} fill={isActive ? 'currentColor' : 'none'} />
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {reviewPromptStatus && (
+                      <p className="mt-3 text-[12px] leading-relaxed text-[var(--p-mid)]">
+                        {reviewPromptStatus}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             </form>
           </aside>
@@ -631,6 +912,21 @@ export default function Booking() {
       {isLoginOpen && (
         <LoginModal onClose={() => setIsLoginOpen(false)} onLogin={handleLogin} />
       )}
+
+      <TestimonialFormModal
+        open={isReviewModalOpen}
+        onClose={() => setIsReviewModalOpen(false)}
+        source="booking"
+        initialRating={reviewRating || 5}
+        bookingId={completedBooking?.id}
+        packageId={completedBooking?.packageId}
+        packageName={completedBooking?.packageName}
+        customer={completedBooking?.customer}
+        onSubmitted={() => {
+          setCompletedBooking(null);
+          setReviewPromptStatus('Testimoni terkirim dan menunggu approval admin.');
+        }}
+      />
     </main>
   );
 }
