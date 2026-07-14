@@ -1,7 +1,6 @@
 // src/components/sections/Hero.jsx
-import { useEffect, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import Button from '../ui/Button';
+import { useEffect, useState } from 'react';
 
 const heroPhotos = ['/photo_utama.jpeg', '/photo_utama2.jpeg'];
 
@@ -58,14 +57,6 @@ export default function Hero() {
         >
           Crafted with <em className="italic text-[var(--p)]">love,</em><br />worn on skin
         </motion.h1>
-
-        <motion.div
-          className="mt-8 flex flex-col justify-center gap-3.5 sm:flex-row"
-          initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55, duration: 0.5 }}
-        >
-          <Button variant="primary" className="w-full sm:w-auto">Book a Session</Button>
-          <Button variant="ghost" className="w-full sm:w-auto">View Gallery</Button>
-        </motion.div>
 
         <motion.div
           className="mt-7 flex justify-center gap-2"
