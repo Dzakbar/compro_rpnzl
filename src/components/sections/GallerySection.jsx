@@ -38,13 +38,13 @@ export default function GallerySection() {
               <h3 className="font-serif text-[22px] font-semibold leading-[1.05] md:text-[31px]">
                 {featuredItem.name}
               </h3>
-              <p className="mt-3 line-clamp-2 text-[11px] leading-relaxed text-white/85 md:mt-4 md:line-clamp-none md:text-[12px]">
+              <p className="mt-3 line-clamp-2 text-[13px] leading-relaxed text-white/85 md:mt-4 md:line-clamp-none md:text-[14px]">
                 {featuredItem.shortDescription}
               </p>
-              <p className="mt-3 text-[10px] font-medium uppercase tracking-[1.2px] text-white/75 md:mt-4 md:tracking-[1.5px]">
+              <p className="mt-3 text-[12px] font-medium uppercase tracking-[1.2px] text-white/75 md:mt-4 md:tracking-[1.5px]">
                 {featuredItem.price}
               </p>
-              <span className="mt-4 inline-flex items-center gap-2 text-[12px] font-semibold text-white md:mt-7 md:text-[13px]">
+              <span className="mt-4 inline-flex items-center gap-2 text-[14px] font-semibold text-white md:mt-7 md:text-[15px]">
                 Book Now <FiArrowRight size={18} />
               </span>
             </div>
@@ -79,7 +79,7 @@ function GridItem({ item, aspectRatio }) {
         <h3 className="font-serif text-[20px] font-semibold uppercase leading-[1.1] text-[var(--p-deep)] md:text-[25px]">
           {item.name}
         </h3>
-        <p className="mt-2 text-[10px] uppercase tracking-[1.2px] text-[var(--p-muted)] md:text-[11px] md:tracking-[1.5px]">
+        <p className="mt-2 text-[12px] uppercase tracking-[1.2px] text-[var(--p-muted)] md:text-[13px] md:tracking-[1.5px]">
           {item.price}
         </p>
       </div>

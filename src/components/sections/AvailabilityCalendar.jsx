@@ -376,7 +376,7 @@ export default function AvailabilityCalendar({ className = '', bookingMode = fal
                 {getPeriodTitle(viewMode, anchorDate)}
               </h3>
             </div>
-            <p className="mt-0.5 text-[10px] uppercase tracking-[1.5px] text-[var(--p-muted)]">
+            <p className="mt-0.5 text-[12px] uppercase tracking-[1.5px] text-[var(--p-muted)]">
               Data admin
             </p>
           </div>
@@ -393,7 +393,7 @@ export default function AvailabilityCalendar({ className = '', bookingMode = fal
                   key={mode}
                   type="button"
                   onClick={() => changeViewMode(mode)}
-                  className={`rounded-[4px] px-3 text-[11px] font-medium uppercase tracking-[1px] transition ${
+                  className={`rounded-[4px] px-3 text-[13px] font-medium uppercase tracking-[1px] transition ${
                     viewMode === mode
                       ? 'bg-white text-[var(--p-mid)] shadow-sm'
                       : 'text-[var(--p-muted)] hover:text-[var(--p-mid)]'
@@ -408,7 +408,7 @@ export default function AvailabilityCalendar({ className = '', bookingMode = fal
           <select
             value={anchorDate.getMonth()}
             onChange={(event) => changeMonth(event.target.value)}
-            className="h-10 rounded-[6px] border border-[var(--p-border)] bg-white px-3 text-[12px] text-[var(--p-mid)] outline-none transition focus:border-[var(--p)]"
+            className="h-10 rounded-[6px] border border-[var(--p-border)] bg-white px-3 text-[14px] text-[var(--p-mid)] outline-none transition focus:border-[var(--p)]"
             aria-label="Pilih bulan"
           >
             {monthNames.map((month, index) => (
@@ -421,7 +421,7 @@ export default function AvailabilityCalendar({ className = '', bookingMode = fal
           <select
             value={anchorDate.getFullYear()}
             onChange={(event) => changeYear(event.target.value)}
-            className="h-10 rounded-[6px] border border-[var(--p-border)] bg-white px-3 text-[12px] text-[var(--p-mid)] outline-none transition focus:border-[var(--p)]"
+            className="h-10 rounded-[6px] border border-[var(--p-border)] bg-white px-3 text-[14px] text-[var(--p-mid)] outline-none transition focus:border-[var(--p)]"
             aria-label="Pilih tahun"
           >
             {yearOptions.map((year) => (
@@ -434,7 +434,7 @@ export default function AvailabilityCalendar({ className = '', bookingMode = fal
           <button
             type="button"
             onClick={pickToday}
-            className="h-10 rounded-[6px] border border-[var(--p)] px-4 text-[11px] font-medium uppercase tracking-[1px] text-[var(--p-mid)] transition hover:bg-[var(--p-light)]"
+            className="h-10 rounded-[6px] border border-[var(--p)] px-4 text-[13px] font-medium uppercase tracking-[1px] text-[var(--p-mid)] transition hover:bg-[var(--p-light)]"
           >
             Hari ini
           </button>
@@ -447,7 +447,7 @@ export default function AvailabilityCalendar({ className = '', bookingMode = fal
             <>
               <div className="mb-2 grid grid-cols-7 gap-1">
                 {weekDayNames.map((day) => (
-                  <div key={day} className="text-center text-[10px] font-medium uppercase tracking-[1px] text-[var(--p-muted)]">
+                  <div key={day} className="text-center text-[12px] font-medium uppercase tracking-[1px] text-[var(--p-muted)]">
                     {day}
                   </div>
                 ))}
@@ -481,7 +481,7 @@ export default function AvailabilityCalendar({ className = '', bookingMode = fal
                     >
                       <div className="flex items-center justify-between gap-1">
                         <span
-                          className={`flex h-6 min-w-6 items-center justify-center rounded-full text-[12px] font-medium ${
+                          className={`flex h-6 min-w-6 items-center justify-center rounded-full text-[14px] font-medium ${
                             isToday ? 'bg-[var(--p-mid)] text-white' : 'text-[var(--p-dark)]'
                           }`}
                         >
@@ -490,8 +490,8 @@ export default function AvailabilityCalendar({ className = '', bookingMode = fal
                         <span className={`h-2 w-2 shrink-0 rounded-full ${style.dot}`} />
                       </div>
                       <div className={`${compact ? 'hidden' : 'mt-2 hidden min-h-[32px] sm:block'}`}>
-                        <p className="truncate text-[11px] font-medium text-[var(--p-dark)]">{info.label}</p>
-                        <p className="mt-0.5 truncate text-[10px] text-[var(--p-muted)]">
+                        <p className="truncate text-[13px] font-medium text-[var(--p-dark)]">{info.label}</p>
+                        <p className="mt-0.5 truncate text-[12px] text-[var(--p-muted)]">
                           {slotLabel(info.slots[0]) || info.note}
                         </p>
                       </div>
@@ -527,7 +527,7 @@ export default function AvailabilityCalendar({ className = '', bookingMode = fal
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <p className="text-[10px] font-medium uppercase tracking-[1px] text-[var(--p-muted)]">
+                        <p className="text-[12px] font-medium uppercase tracking-[1px] text-[var(--p-muted)]">
                           {fullDayNames[date.getDay()]}
                         </p>
                         <p className="mt-1 font-serif text-[24px] leading-none text-[var(--p-mid)]">
@@ -536,14 +536,14 @@ export default function AvailabilityCalendar({ className = '', bookingMode = fal
                       </div>
                       <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${style.dot}`} />
                     </div>
-                    <span className={`mt-4 inline-flex rounded-full px-2.5 py-1 text-[10px] font-medium ${style.badge}`}>
+                    <span className={`mt-4 inline-flex rounded-full px-2.5 py-1 text-[12px] font-medium ${style.badge}`}>
                       {isToday ? 'Hari ini' : info.label}
                     </span>
                     <div className="mt-3 space-y-1.5">
                       {(info.slots.length ? info.slots : [{ id: 'note', time: info.note }]).slice(0, 3).map((slot) => (
                         <span
                           key={slot.id || slot.time}
-                          className="block truncate rounded-[4px] bg-white/80 px-2 py-1 text-[11px] text-[var(--p-dark)]"
+                          className="block truncate rounded-[4px] bg-white/80 px-2 py-1 text-[13px] text-[var(--p-dark)]"
                         >
                           {slotLabel(slot)}
                         </span>
@@ -560,19 +560,19 @@ export default function AvailabilityCalendar({ className = '', bookingMode = fal
           <aside className="border-t border-[var(--p-border)] bg-[var(--p-ultra)] p-4 lg:border-l lg:border-t-0">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-[10px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
+                <p className="text-[12px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
                   Detail jadwal
                 </p>
                 <h4 className="mt-1 font-serif text-[24px] font-light leading-tight text-[var(--p-mid)]">
                   {formatSelectedDate(selectedDate)}
                 </h4>
               </div>
-              <span className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-medium ${selectedStyle.badge}`}>
+              <span className={`shrink-0 rounded-full px-2.5 py-1 text-[12px] font-medium ${selectedStyle.badge}`}>
                 {selectedInfo.label}
               </span>
             </div>
 
-            <p className="mt-3 text-[12px] leading-relaxed text-[var(--p-muted)]">
+            <p className="mt-3 text-[14px] leading-relaxed text-[var(--p-muted)]">
               {selectedInfo.note}
             </p>
 
@@ -581,14 +581,14 @@ export default function AvailabilityCalendar({ className = '', bookingMode = fal
                 selectedInfo.slots.map((slot) => (
                   <div
                     key={slot.id || slot.time}
-                    className="flex items-center gap-2 rounded-[6px] border border-[var(--p-border)] bg-white px-3 py-2 text-[12px] text-[var(--p-dark)]"
+                    className="flex items-center gap-2 rounded-[6px] border border-[var(--p-border)] bg-white px-3 py-2 text-[14px] text-[var(--p-dark)]"
                   >
                     <FiClock className="shrink-0 text-[var(--p)]" size={14} />
                     <span>{slotLabel(slot)}</span>
                   </div>
                 ))
               ) : (
-                <div className="rounded-[6px] border border-dashed border-[var(--p-border)] bg-white px-3 py-3 text-[12px] text-[var(--p-muted)]">
+                <div className="rounded-[6px] border border-dashed border-[var(--p-border)] bg-white px-3 py-3 text-[14px] text-[var(--p-muted)]">
                   Belum ada slot tersedia.
                 </div>
               )}

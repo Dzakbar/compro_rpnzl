@@ -14,7 +14,7 @@ export default function SectionTitle({ label, title, subtitle, center = false, l
       />
       <Divider center={center} />
       {subtitle && (
-        <p className="text-[13px] text-[var(--p-muted)] leading-relaxed">{subtitle}</p>
+        <p className="text-[15px] text-[var(--p-muted)] leading-relaxed">{subtitle}</p>
       )}
     </div>
   );

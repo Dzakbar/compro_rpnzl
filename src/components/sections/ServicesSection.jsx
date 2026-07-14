@@ -47,10 +47,10 @@ export default function ServicesSection() {
               <div className="font-serif text-[19px] font-light text-[var(--p-mid)] mb-1.5">
                 {category.name}
               </div>
-              <div className="text-[11px] text-[var(--p-muted)] leading-relaxed mb-3.5">
+              <div className="text-[13px] text-[var(--p-muted)] leading-relaxed mb-3.5">
                 {category.shortDescription}
               </div>
-              <div className="text-[10px] tracking-[1px] text-[var(--p-deep)] uppercase font-medium">
+              <div className="text-[12px] tracking-[1px] text-[var(--p-deep)] uppercase font-medium">
                 {category.price}
               </div>
             </Link>

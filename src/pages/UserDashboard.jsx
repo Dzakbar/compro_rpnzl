@@ -118,7 +118,7 @@ export default function UserDashboard() {
                     <FiClock className="text-yellow-600" size={18} />
                   </div>
                   <div>
-                    <p className="text-[11px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
+                    <p className="text-[13px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
                       Pending
                     </p>
                     <p className="text-[24px] font-light text-[var(--p-dark)]">
@@ -135,7 +135,7 @@ export default function UserDashboard() {
                     <FiCheck className="text-green-600" size={18} />
                   </div>
                   <div>
-                    <p className="text-[11px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
+                    <p className="text-[13px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
                       Confirmed
                     </p>
                     <p className="text-[24px] font-light text-[var(--p-dark)]">
@@ -152,7 +152,7 @@ export default function UserDashboard() {
                     <FiCheck className="text-blue-600" size={18} />
                   </div>
                   <div>
-                    <p className="text-[11px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
+                    <p className="text-[13px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
                       Completed
                     </p>
                     <p className="text-[24px] font-light text-[var(--p-dark)]">
@@ -166,11 +166,11 @@ export default function UserDashboard() {
 
           {/* Bookings Grid */}
           {loading ? (
-            <div className="rounded-[8px] border border-dashed border-[var(--p-border)] bg-white px-5 py-10 text-center text-[12px] text-[var(--p-muted)]">
+            <div className="rounded-[8px] border border-dashed border-[var(--p-border)] bg-white px-5 py-10 text-center text-[14px] text-[var(--p-muted)]">
               Loading your bookings...
             </div>
           ) : bookings.length === 0 ? (
-            <div className="rounded-[8px] border border-dashed border-[var(--p-border)] bg-white px-5 py-10 text-center text-[12px] text-[var(--p-muted)]">
+            <div className="rounded-[8px] border border-dashed border-[var(--p-border)] bg-white px-5 py-10 text-center text-[14px] text-[var(--p-muted)]">
               <p>Belum ada booking.</p>
               <button
                 onClick={() => navigate('/booking')}
@@ -191,7 +191,7 @@ export default function UserDashboard() {
           <div className="mt-8 flex justify-center">
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 rounded-[8px] border border-red-200 bg-red-50 px-6 py-3 text-[12px] font-medium uppercase tracking-[1.5px] text-red-600 transition hover:bg-red-100"
+              className="flex items-center gap-2 rounded-[8px] border border-red-200 bg-red-50 px-6 py-3 text-[14px] font-medium uppercase tracking-[1.5px] text-red-600 transition hover:bg-red-100"
             >
               <FiLogOut size={16} />
               Logout

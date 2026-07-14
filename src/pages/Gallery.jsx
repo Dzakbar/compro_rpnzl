@@ -64,7 +64,7 @@ export default function Gallery() {
           <div className="mt-10 text-center">
             <Link
               to={`/booking?category=${category.slug}`}
-              className="inline-flex items-center gap-2 border border-[var(--p-mid)] px-6 py-3 text-[12px] font-semibold uppercase tracking-[1.5px] text-[var(--p-mid)] no-underline transition-colors hover:bg-[var(--p-mid)] hover:text-white"
+              className="inline-flex items-center gap-2 border border-[var(--p-mid)] px-6 py-3 text-[14px] font-semibold uppercase tracking-[1.5px] text-[var(--p-mid)] no-underline transition-colors hover:bg-[var(--p-mid)] hover:text-white"
             >
               Booking {category.name}
               <FiArrowRight size={17} />

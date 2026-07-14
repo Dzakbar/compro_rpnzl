@@ -73,10 +73,10 @@ function buildWhatsAppMessage(booking) {
 }
 
 const inputClass =
-  'h-12 w-full border border-[var(--p-border)] bg-[#f8f6f0] px-4 text-[13px] text-[var(--p-dark)] outline-none transition placeholder:text-[var(--p-muted)]/60 focus:border-[var(--p)]';
+  'h-12 w-full border border-[var(--p-border)] bg-[#f8f6f0] px-4 text-[16px] text-[var(--p-dark)] outline-none transition placeholder:text-[var(--p-muted)]/60 focus:border-[var(--p)]';
 
 const textareaClass =
-  'min-h-[104px] w-full border border-[var(--p-border)] bg-[#f8f6f0] px-4 py-3 text-[13px] text-[var(--p-dark)] outline-none transition placeholder:text-[var(--p-muted)]/60 focus:border-[var(--p)]';
+  'min-h-[104px] w-full border border-[var(--p-border)] bg-[#f8f6f0] px-4 py-3 text-[16px] text-[var(--p-dark)] outline-none transition placeholder:text-[var(--p-muted)]/60 focus:border-[var(--p)]';
 
 function LoginModal({ onClose, onLogin }) {
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
@@ -158,7 +158,7 @@ function LoginModal({ onClose, onLogin }) {
           </div>
 
           {loginError && (
-            <p className="mt-4 text-[13px] text-red-500">{loginError}</p>
+            <p className="mt-4 text-[15px] text-red-500">{loginError}</p>
           )}
         </div>
 
@@ -168,7 +168,7 @@ function LoginModal({ onClose, onLogin }) {
           </h2>
 
           <label className="mt-8 block">
-            <span className="mb-3 block text-[13px] font-semibold uppercase tracking-[1px] text-[var(--p-mid)]">
+            <span className="mb-3 block text-[15px] font-semibold uppercase tracking-[1px] text-[var(--p-mid)]">
               Email
             </span>
             <div className="flex h-14 items-center border border-[var(--p-mid)] px-3 md:px-4">
@@ -179,14 +179,14 @@ function LoginModal({ onClose, onLogin }) {
                 name="email"
                 value={loginForm.email}
                 onChange={handleChange}
-                className="h-full min-w-0 flex-1 bg-transparent px-4 text-[14px] text-[var(--p-dark)] outline-none placeholder:text-[var(--p-muted)]"
+                className="h-full min-w-0 flex-1 bg-transparent px-4 text-[16px] text-[var(--p-dark)] outline-none placeholder:text-[var(--p-muted)]"
                 placeholder="Your email"
               />
             </div>
           </label>
 
           <label className="mt-5 block">
-            <span className="mb-3 block text-[13px] font-semibold uppercase tracking-[1px] text-[var(--p-mid)]">
+            <span className="mb-3 block text-[15px] font-semibold uppercase tracking-[1px] text-[var(--p-mid)]">
               Password
             </span>
             <div className="flex h-14 items-center border border-[var(--p-border)] px-3 md:px-4">
@@ -197,7 +197,7 @@ function LoginModal({ onClose, onLogin }) {
                 name="password"
                 value={loginForm.password}
                 onChange={handleChange}
-                className="h-full min-w-0 flex-1 bg-transparent px-4 text-[14px] text-[var(--p-dark)] outline-none placeholder:text-[var(--p-muted)]"
+                className="h-full min-w-0 flex-1 bg-transparent px-4 text-[16px] text-[var(--p-dark)] outline-none placeholder:text-[var(--p-muted)]"
                 placeholder="Your password"
               />
             </div>
@@ -206,7 +206,7 @@ function LoginModal({ onClose, onLogin }) {
           <button
             type="submit"
             disabled={isLoggingIn}
-            className="mt-8 h-14 w-full bg-[var(--p)] text-[13px] font-semibold uppercase tracking-[1.8px] text-white transition hover:bg-[var(--p-deep)] disabled:opacity-50"
+            className="mt-8 h-14 w-full bg-[var(--p)] text-[15px] font-semibold uppercase tracking-[1.8px] text-white transition hover:bg-[var(--p-deep)] disabled:opacity-50"
           >
             {isLoggingIn ? 'Signing in...' : 'Sign in'}
           </button>
@@ -637,7 +637,7 @@ export default function Booking() {
                   </button>
                 );
               })}
-              <span className="ml-2 text-[12px] text-[var(--p-muted)]">
+              <span className="ml-2 text-[14px] text-[var(--p-muted)]">
                 {reviewSummary.total > 0
                   ? `${reviewSummary.average.toFixed(1)} (${reviewSummary.total} review)`
                   : 'Belum ada review'}
@@ -645,13 +645,13 @@ export default function Booking() {
             </div>
 
             {reviewPromptStatus && (
-              <p className="mt-2 text-[12px] leading-relaxed text-[var(--p-mid)]" role="status">
+              <p className="mt-2 text-[14px] leading-relaxed text-[var(--p-mid)]" role="status">
                 {reviewPromptStatus}
               </p>
             )}
 
             <div className="mt-7 border-y border-[var(--p-border)] py-5">
-              <p className="text-[13px] font-semibold uppercase tracking-[1px] text-[var(--p-mid)]">
+              <p className="text-[15px] font-semibold uppercase tracking-[1px] text-[var(--p-mid)]">
                 Paket
               </p>
               <div className="mt-3 flex items-start gap-3">
@@ -661,8 +661,8 @@ export default function Booking() {
                   aria-hidden="true"
                 />
                 <div>
-                  <p className="text-[13px] font-medium text-[var(--p-dark)]">{category.tone}</p>
-                  <p className="mt-1 text-[12px] leading-relaxed text-[var(--p-muted)]">
+                  <p className="text-[15px] font-medium text-[var(--p-dark)]">{category.tone}</p>
+                  <p className="mt-1 text-[14px] leading-relaxed text-[var(--p-muted)]">
                     {category.description}
                   </p>
                 </div>
@@ -670,19 +670,19 @@ export default function Booking() {
             </div>
 
             <div className="mt-8">
-              <p className="mb-4 text-[13px] font-semibold uppercase tracking-[1px] text-[var(--p-mid)]">
+              <p className="mb-4 text-[15px] font-semibold uppercase tracking-[1px] text-[var(--p-mid)]">
                 Availability
               </p>
               
               {!isLoggedIn && (
                 <div className="mb-4 border border-dashed border-amber-300 bg-amber-50 p-4 text-center">
-                  <p className="text-[12px] text-amber-900">
+                  <p className="text-[14px] text-amber-900">
                     <span className="font-semibold">Sign in required</span> to select date and time
                   </p>
                   <button
                     type="button"
                     onClick={() => setIsLoginOpen(true)}
-                    className="mt-3 h-10 w-full bg-amber-600 text-[12px] font-semibold uppercase tracking-[1px] text-white transition hover:bg-amber-700"
+                    className="mt-3 h-10 w-full bg-amber-600 text-[14px] font-semibold uppercase tracking-[1px] text-white transition hover:bg-amber-700"
                   >
                     Sign in now
                   </button>
@@ -695,7 +695,7 @@ export default function Booking() {
                 onSelectDate={handleSelectDate}
                 className="shadow-none"
               />
-              <div className="mt-4 space-y-3 text-[13px] text-[var(--p-mid)]">
+              <div className="mt-4 space-y-3 text-[15px] text-[var(--p-mid)]">
                 <div className="flex items-center gap-4">
                   <span className="h-7 w-7 bg-emerald-50 border border-emerald-200" aria-hidden="true" />
                   <span>Tersedia</span>
@@ -714,17 +714,17 @@ export default function Booking() {
             <form onSubmit={handleSubmit} className="mt-7">
               <div className="grid gap-4">
                 <label className="block">
-                  <span className="mb-2 block text-[13px] font-semibold uppercase tracking-[1px] text-[var(--p-mid)]">
+                  <span className="mb-2 block text-[15px] font-semibold uppercase tracking-[1px] text-[var(--p-mid)]">
                     Pick up date
                   </span>
-                  <div className="flex h-12 items-center gap-3 border border-[var(--p-border)] bg-[#f8f6f0] px-4 text-[13px] text-[var(--p-dark)]">
+                  <div className="flex h-12 items-center gap-3 border border-[var(--p-border)] bg-[#f8f6f0] px-4 text-[15px] text-[var(--p-dark)]">
                     <FiCalendar className="text-[var(--p)]" size={16} />
                     {selectedSchedule?.dateLabel || 'Select date'}
                   </div>
                 </label>
 
                 <label className="block">
-                  <span className="mb-2 block text-[13px] font-semibold uppercase tracking-[1px] text-[var(--p-mid)]">
+                  <span className="mb-2 block text-[15px] font-semibold uppercase tracking-[1px] text-[var(--p-mid)]">
                     Jam
                   </span>
                   <select
@@ -748,7 +748,7 @@ export default function Booking() {
                     <button
                       type="button"
                       onClick={() => setIsLoginOpen(true)}
-                      className="h-12 w-full bg-[var(--p)] px-7 text-[11px] font-semibold uppercase tracking-[1.8px] text-white transition hover:bg-[var(--p-deep)]"
+                      className="h-12 w-full bg-[var(--p)] px-7 text-[13px] font-semibold uppercase tracking-[1.8px] text-white transition hover:bg-[var(--p-deep)]"
                     >
                       Sign in to book
                     </button>
@@ -756,7 +756,7 @@ export default function Booking() {
                 ) : (
                   <div className="grid gap-4 border-t border-[var(--p-border)] pt-6 md:grid-cols-2">
                     <label className="block">
-                      <span className="mb-1.5 block text-[10px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
+                      <span className="mb-1.5 block text-[12px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
                         Nama
                       </span>
                       <input
@@ -770,7 +770,7 @@ export default function Booking() {
                     </label>
 
                     <label className="block">
-                      <span className="mb-1.5 block text-[10px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
+                      <span className="mb-1.5 block text-[12px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
                         WhatsApp
                       </span>
                       <input
@@ -784,7 +784,7 @@ export default function Booking() {
                     </label>
 
                     <label className="block md:col-span-2">
-                      <span className="mb-1.5 block text-[10px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
+                      <span className="mb-1.5 block text-[12px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
                         Acara
                       </span>
                       <input
@@ -798,7 +798,7 @@ export default function Booking() {
                     </label>
 
                     <label className="block md:col-span-2">
-                      <span className="mb-1.5 block text-[10px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
+                      <span className="mb-1.5 block text-[12px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
                         Lokasi
                       </span>
                       <input
@@ -812,7 +812,7 @@ export default function Booking() {
                     </label>
 
                     <label className="block md:col-span-2">
-                      <span className="mb-1.5 block text-[10px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
+                      <span className="mb-1.5 block text-[12px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
                         Catatan
                       </span>
                       <textarea
@@ -827,7 +827,7 @@ export default function Booking() {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="h-12 bg-[var(--p)] px-7 text-[11px] font-semibold uppercase tracking-[1.8px] text-white transition hover:bg-[var(--p-deep)] md:col-span-2"
+                      className="h-12 bg-[var(--p)] px-7 text-[13px] font-semibold uppercase tracking-[1.8px] text-white transition hover:bg-[var(--p-deep)] md:col-span-2"
                     >
                       {isSubmitting ? 'Mengirim...' : 'Kirim booking'}
                     </button>
@@ -844,7 +844,7 @@ export default function Booking() {
                     role="status"
                   >
                     <p
-                      className={`text-[12px] leading-relaxed ${
+                      className={`text-[14px] leading-relaxed ${
                         submitStatus.startsWith('Booking berhasil')
                           ? 'text-emerald-900'
                           : 'text-amber-900'
@@ -859,7 +859,7 @@ export default function Booking() {
                           setSubmitStatus('');
                           setIsLoginOpen(true);
                         }}
-                        className="mt-3 h-9 w-full rounded-[4px] bg-amber-600 text-[11px] font-semibold uppercase tracking-[1px] text-white transition hover:bg-amber-700"
+                        className="mt-3 h-9 w-full rounded-[4px] bg-amber-600 text-[13px] font-semibold uppercase tracking-[1px] text-white transition hover:bg-amber-700"
                       >
                         Login ulang
                       </button>
@@ -869,10 +869,10 @@ export default function Booking() {
 
                 {completedBooking && (
                   <div className="border border-[var(--p-border)] bg-[var(--p-ultra)] p-5">
-                    <p className="text-[12px] font-semibold uppercase tracking-[1.4px] text-[var(--p-mid)]">
+                    <p className="text-[14px] font-semibold uppercase tracking-[1.4px] text-[var(--p-mid)]">
                       Rating pengalaman booking
                     </p>
-                    <p className="mt-2 text-[12px] leading-relaxed text-[var(--p-muted)]">
+                    <p className="mt-2 text-[14px] leading-relaxed text-[var(--p-muted)]">
                       Beri rating untuk pengalaman booking Anda. Rating 4 atau 5 akan membuka form testimoni.
                     </p>
                     <div className="mt-4 flex items-center gap-1.5">
@@ -897,7 +897,7 @@ export default function Booking() {
                     </div>
 
                     {reviewPromptStatus && (
-                      <p className="mt-3 text-[12px] leading-relaxed text-[var(--p-mid)]">
+                      <p className="mt-3 text-[14px] leading-relaxed text-[var(--p-mid)]">
                         {reviewPromptStatus}
                       </p>
                     )}

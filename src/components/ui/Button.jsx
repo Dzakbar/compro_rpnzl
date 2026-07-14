@@ -11,7 +11,7 @@ export default function Button({ children, variant = 'primary', onClick, classNa
     <button
       onClick={onClick}
       className={`
-        px-8 py-3 text-[11px] font-medium font-sans tracking-[2px] uppercase
+        px-8 py-3 text-[13px] font-medium font-sans tracking-[2px] uppercase
         rounded-[2px] transition-colors duration-200 cursor-pointer
         ${variants[variant]} ${className}
       `}

@@ -30,14 +30,14 @@ function TestimonialCard({ testimonial }) {
     <article className="flex min-h-[230px] flex-col justify-between border border-[var(--p-border)] bg-white p-5">
       <div>
         <RatingStars rating={testimonial.rating} />
-        <p className="mt-4 line-clamp-5 text-[13px] leading-relaxed text-[var(--p-mid)]">
+        <p className="mt-4 line-clamp-5 text-[15px] leading-relaxed text-[var(--p-mid)]">
           "{testimonial.message}"
         </p>
       </div>
       <div className="mt-6 border-t border-[var(--p-border)] pt-4">
-        <p className="text-[12px] font-semibold text-[var(--p-dark)]">{testimonial.customer_name}</p>
+        <p className="text-[14px] font-semibold text-[var(--p-dark)]">{testimonial.customer_name}</p>
         {testimonial.package_name && (
-          <p className="mt-1 text-[11px] uppercase tracking-[1.2px] text-[var(--p-muted)]">
+          <p className="mt-1 text-[13px] uppercase tracking-[1.2px] text-[var(--p-muted)]">
             {testimonial.package_name}
           </p>
         )}
@@ -105,7 +105,7 @@ export default function TestimoniSection() {
             <span className="font-serif text-[30px] text-[var(--p-mid)]">{averageRating}</span>
             <div>
               <RatingStars rating={Math.round(Number(meta.average_rating || 0))} />
-              <p className="mt-1 text-[11px] uppercase tracking-[1.2px] text-[var(--p-muted)]">
+              <p className="mt-1 text-[13px] uppercase tracking-[1.2px] text-[var(--p-muted)]">
                 {meta.total_published || 0} testimoni published
               </p>
             </div>
@@ -117,7 +117,7 @@ export default function TestimoniSection() {
               setNotice('');
               setIsModalOpen(true);
             }}
-            className="h-12 border border-[var(--p)] px-7 text-[11px] font-semibold uppercase tracking-[1.8px] text-[var(--p-mid)] transition hover:bg-[var(--p-ultra)]"
+            className="h-12 border border-[var(--p)] px-7 text-[13px] font-semibold uppercase tracking-[1.8px] text-[var(--p-mid)] transition hover:bg-[var(--p-ultra)]"
           >
             Tulis testimoni
           </button>
@@ -125,7 +125,7 @@ export default function TestimoniSection() {
 
         {notice && (
           <div className="mx-auto mt-5 max-w-[720px] border border-dashed border-amber-300 bg-amber-50 p-3 text-center">
-            <p className="text-[12px] leading-relaxed text-amber-900">{notice}</p>
+            <p className="text-[14px] leading-relaxed text-amber-900">{notice}</p>
           </div>
         )}
 
@@ -143,7 +143,7 @@ export default function TestimoniSection() {
           </div>
         ) : (
           <div className="mx-auto mt-10 max-w-[640px] border border-dashed border-[var(--p-border)] bg-[var(--p-ultra)] px-5 py-8 text-center">
-            <p className="text-[13px] leading-relaxed text-[var(--p-mid)]">
+            <p className="text-[15px] leading-relaxed text-[var(--p-mid)]">
               {error || 'Belum ada testimoni yang dipublish. Jadilah yang pertama berbagi pengalaman.'}
             </p>
           </div>

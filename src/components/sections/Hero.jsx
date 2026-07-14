@@ -45,7 +45,7 @@ export default function Hero() {
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
       >
         <motion.p
-          className="mb-3.5 text-[10px] uppercase tracking-[3px] text-[var(--p-light)] opacity-80 sm:tracking-[4px]"
+          className="mb-3.5 text-[12px] uppercase tracking-[3px] text-[var(--p-light)] opacity-80 sm:tracking-[4px]"
           initial={{ opacity: 0 }} animate={{ opacity: 0.8 }} transition={{ delay: 0.2, duration: 0.5 }}
         >
           &#10022; Henna Art & Beauty

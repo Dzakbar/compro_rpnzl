@@ -9,10 +9,10 @@ const emptyCustomer = {
 };
 
 const inputClass =
-  'h-12 w-full border border-[var(--p-border)] bg-[#f8f6f0] px-4 text-[13px] text-[var(--p-dark)] outline-none transition placeholder:text-[var(--p-muted)]/60 focus:border-[var(--p)]';
+  'h-12 w-full border border-[var(--p-border)] bg-[#f8f6f0] px-4 text-[16px] text-[var(--p-dark)] outline-none transition placeholder:text-[var(--p-muted)]/60 focus:border-[var(--p)]';
 
 const textareaClass =
-  'min-h-[118px] w-full border border-[var(--p-border)] bg-[#f8f6f0] px-4 py-3 text-[13px] text-[var(--p-dark)] outline-none transition placeholder:text-[var(--p-muted)]/60 focus:border-[var(--p)]';
+  'min-h-[118px] w-full border border-[var(--p-border)] bg-[#f8f6f0] px-4 py-3 text-[16px] text-[var(--p-dark)] outline-none transition placeholder:text-[var(--p-muted)]/60 focus:border-[var(--p)]';
 
 function getStoredCustomer() {
   try {
@@ -156,26 +156,26 @@ function TestimonialFormDialog({
         </button>
 
         <div className="pr-10">
-          <p className="text-[11px] font-semibold uppercase tracking-[1.8px] text-[var(--p-muted)]">
+          <p className="text-[13px] font-semibold uppercase tracking-[1.8px] text-[var(--p-muted)]">
             Testimoni
           </p>
           <h3 className="mt-2 font-serif text-[32px] font-light leading-tight text-[var(--p-mid)]">
             Bagikan pengalaman Anda
           </h3>
-          <p className="mt-3 text-[13px] leading-relaxed text-[var(--p-muted)]">
+          <p className="mt-3 text-[15px] leading-relaxed text-[var(--p-muted)]">
             Testimoni akan tampil di halaman utama setelah disetujui admin.
           </p>
         </div>
 
         {packageName && (
-          <div className="mt-5 border border-[var(--p-border)] bg-[var(--p-ultra)] px-4 py-3 text-[12px] text-[var(--p-mid)]">
+          <div className="mt-5 border border-[var(--p-border)] bg-[var(--p-ultra)] px-4 py-3 text-[14px] text-[var(--p-mid)]">
             Paket: <span className="font-semibold">{packageName}</span>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="mt-6 grid gap-4">
           <label className="block">
-            <span className="mb-2 block text-[10px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
+            <span className="mb-2 block text-[12px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
               Rating
             </span>
             <StarPicker value={rating} onChange={setRating} />
@@ -183,7 +183,7 @@ function TestimonialFormDialog({
 
           <div className="grid gap-4 md:grid-cols-2">
             <label className="block">
-              <span className="mb-1.5 block text-[10px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
+              <span className="mb-1.5 block text-[12px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
                 Nama
               </span>
               <input
@@ -197,7 +197,7 @@ function TestimonialFormDialog({
             </label>
 
             <label className="block">
-              <span className="mb-1.5 block text-[10px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
+              <span className="mb-1.5 block text-[12px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
                 Email
               </span>
               <input
@@ -212,7 +212,7 @@ function TestimonialFormDialog({
           </div>
 
           <label className="block">
-            <span className="mb-1.5 block text-[10px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
+            <span className="mb-1.5 block text-[12px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
               WhatsApp
             </span>
             <input
@@ -225,7 +225,7 @@ function TestimonialFormDialog({
           </label>
 
           <label className="block">
-            <span className="mb-1.5 block text-[10px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
+            <span className="mb-1.5 block text-[12px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
               Testimoni
             </span>
             <textarea
@@ -239,14 +239,14 @@ function TestimonialFormDialog({
 
           {status && (
             <div className="border border-dashed border-amber-300 bg-amber-50 p-3">
-              <p className="text-[12px] leading-relaxed text-amber-900">{status}</p>
+              <p className="text-[14px] leading-relaxed text-amber-900">{status}</p>
             </div>
           )}
 
           <button
             type="submit"
             disabled={isSubmitting}
-            className="h-12 bg-[var(--p)] px-7 text-[11px] font-semibold uppercase tracking-[1.8px] text-white transition hover:bg-[var(--p-deep)] disabled:opacity-50"
+            className="h-12 bg-[var(--p)] px-7 text-[13px] font-semibold uppercase tracking-[1.8px] text-white transition hover:bg-[var(--p-deep)] disabled:opacity-50"
           >
             {isSubmitting ? 'Mengirim...' : 'Kirim testimoni'}
           </button>

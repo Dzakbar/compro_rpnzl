@@ -21,24 +21,24 @@ export default function Footer() {
           <div className="font-serif text-[21px] font-light tracking-[3px] text-[var(--p-mid)] mb-2">
             RPNZL <span className="text-[var(--p)]">Art</span>
           </div>
-          <p className="text-[11px] text-[rgba(245,208,223,0.4)] leading-relaxed max-w-[230px]">
+          <p className="text-[13px] text-[rgba(245,208,223,0.4)] leading-relaxed max-w-[230px]">
             Henna art profesional untuk momen spesial Anda. Melayani Jabodetabek dan sekitarnya.
           </p>
         </div>
 
         {/* Navigation */}
         <div>
-          <h4 className="text-[9px] tracking-[3px] uppercase text-[var(--p)] mb-3.5">Navigasi</h4>
+          <h4 className="text-[12px] tracking-[3px] uppercase text-[var(--p)] mb-3.5">Navigasi</h4>
           <ul className="list-none space-y-2">
             {navLinks.map((l) => (
-              <li key={l} className="text-[11px] text-[rgba(245,208,223,0.45)] cursor-pointer hover:text-[var(--p-light)] transition-colors">{l}</li>
+              <li key={l} className="text-[13px] text-[rgba(245,208,223,0.45)] cursor-pointer hover:text-[var(--p-light)] transition-colors">{l}</li>
             ))}
           </ul>
         </div>
 
         {/* Contact */}
         <div>
-          <h4 className="text-[9px] tracking-[3px] uppercase text-[var(--p)] mb-3.5">Kontak</h4>
+          <h4 className="text-[12px] tracking-[3px] uppercase text-[var(--p)] mb-3.5">Kontak</h4>
           <ul className="list-none space-y-2">
             {contacts.map((contact) => (
               <li key={contact.label}>
@@ -46,7 +46,7 @@ export default function Footer() {
                   href={contact.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[11px] text-[rgba(245,208,223,0.45)] transition-colors hover:text-[var(--p-light)]"
+                  className="text-[13px] text-[rgba(245,208,223,0.45)] transition-colors hover:text-[var(--p-light)]"
                 >
                   {contact.label}
                 </a>
@@ -59,8 +59,8 @@ export default function Footer() {
 
       {/* Bottom bar */}
       <div className="flex flex-col gap-2 border-t border-[rgba(232,164,187,0.12)] pt-5 text-left md:flex-row md:justify-between">
-        <p className="text-[10px] text-[rgba(245,208,223,0.25)] tracking-[0.5px]">© 2026 RPNZL Art. All rights reserved.</p>
-        <p className="text-[10px] text-[rgba(245,208,223,0.25)]">Made with ♡ in Indonesia</p>
+        <p className="text-[12px] text-[rgba(245,208,223,0.25)] tracking-[0.5px]">© 2026 RPNZL Art. All rights reserved.</p>
+        <p className="text-[12px] text-[rgba(245,208,223,0.25)]">Made with ♡ in Indonesia</p>
       </div>
     </footer>
   );

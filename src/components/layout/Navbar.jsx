@@ -15,7 +15,7 @@ const navItems = [
 ];
 
 const navLinkClass = ({ isActive }) => `
-  text-[12px] tracking-[1.5px] uppercase no-underline transition-colors
+  text-[14px] tracking-[1.5px] uppercase no-underline transition-colors
   ${isActive
     ? 'text-[var(--p-mid)] border-b border-[var(--p)] pb-0.5'
     : 'text-[var(--p-muted)] hover:text-[var(--p-mid)]'
@@ -23,12 +23,12 @@ const navLinkClass = ({ isActive }) => `
 `;
 
 const mobileNavLinkClass = ({ isActive }) => `
-  rounded-[6px] px-3 py-3 text-[12px] font-medium uppercase tracking-[1.5px] no-underline transition-colors
+  rounded-[6px] px-3 py-3 text-[14px] font-medium uppercase tracking-[1.5px] no-underline transition-colors
   ${isActive ? 'bg-[var(--p-ultra)] text-[var(--p-mid)]' : 'text-[var(--p-muted)]'}
 `;
 
 const mobileCategoryLinkClass = ({ isActive }) => `
-  rounded-[6px] px-3 py-2 text-[11px] uppercase tracking-[1.2px] no-underline transition-colors
+  rounded-[6px] px-3 py-2 text-[13px] uppercase tracking-[1.2px] no-underline transition-colors
   ${isActive ? 'bg-[var(--p-ultra)] text-[var(--p-mid)]' : 'text-[var(--p-muted)]'}
 `;
 
@@ -119,7 +119,7 @@ export default function Navbar() {
                     key={category.id}
                     to={`/gallery/${getHennaCategorySlug(category)}`}
                     className={({ isActive }) => `
-                      block px-4 py-2.5 text-[11px] uppercase tracking-[1.4px] no-underline transition-colors
+                      block px-4 py-2.5 text-[13px] uppercase tracking-[1.4px] no-underline transition-colors
                       ${isActive
                         ? 'bg-[var(--p-ultra)] text-[var(--p-mid)]'
                         : 'text-[var(--p-muted)] hover:bg-[var(--p-ultra)] hover:text-[var(--p-mid)]'
@@ -209,7 +209,7 @@ export default function Navbar() {
           </div>
 
           <div className="mt-4 border-t border-[var(--p-border)] pt-4">
-            <p className="mb-2 px-3 text-[10px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
+            <p className="mb-2 px-3 text-[12px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
               Kategori Gallery
             </p>
             <div className="grid gap-1">
@@ -237,15 +237,15 @@ export default function Navbar() {
                   {user?.picture ? (
                     <img src={user.picture} alt="" className="h-9 w-9 rounded-full object-cover" />
                   ) : (
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--p-mid)] text-[12px] font-bold text-white">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--p-mid)] text-[14px] font-bold text-white">
                       {getInitials(user?.name)}
                     </span>
                   )}
                   <span className="min-w-0">
-                    <span className="block truncate text-[13px] font-medium text-[var(--p-dark)]">
+                    <span className="block truncate text-[15px] font-medium text-[var(--p-dark)]">
                       {user?.name || 'User'}
                     </span>
-                    <span className="block truncate text-[11px] text-[var(--p-muted)]">
+                    <span className="block truncate text-[13px] text-[var(--p-muted)]">
                       {userContact}
                     </span>
                   </span>
@@ -253,7 +253,7 @@ export default function Navbar() {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="flex w-full items-center justify-center gap-2 rounded-[6px] border border-red-200 bg-red-50 px-4 py-3 text-[11px] font-semibold uppercase tracking-[1px] text-red-600"
+                  className="flex w-full items-center justify-center gap-2 rounded-[6px] border border-red-200 bg-red-50 px-4 py-3 text-[13px] font-semibold uppercase tracking-[1px] text-red-600"
                 >
                   <FiLogOut size={14} />
                   Logout
@@ -282,11 +282,11 @@ function UserPill({ user, getInitials, onClick }) {
       {user?.picture ? (
         <img src={user.picture} alt="" className="h-8 w-8 rounded-full object-cover" />
       ) : (
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--p-mid)] text-[12px] font-bold">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--p-mid)] text-[14px] font-bold">
           {getInitials(user?.name)}
         </div>
       )}
-      <span className="truncate text-[11px] font-medium uppercase tracking-[1px]">
+      <span className="truncate text-[13px] font-medium uppercase tracking-[1px]">
         {user?.name?.split(' ')[0] || 'User'}
       </span>
     </button>
@@ -305,24 +305,24 @@ function UserMenuContent({
   return (
     <>
       <div className="border-b border-[var(--p-border)] px-4 py-4">
-        <p className="text-[11px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
+        <p className="text-[13px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
           Akun Anda
         </p>
-        <p className="mt-2 text-[13px] font-serif text-[var(--p-dark)]">
+        <p className="mt-2 text-[15px] font-serif text-[var(--p-dark)]">
           {user?.name}
         </p>
-        <p className="break-words text-[11px] text-[var(--p-muted)]">
+        <p className="break-words text-[13px] text-[var(--p-muted)]">
           {userContact}
         </p>
       </div>
 
       <div className="border-b border-[var(--p-border)] px-4 py-4">
-        <p className="mb-3 text-[10px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
+        <p className="mb-3 text-[12px] font-medium uppercase tracking-[1.5px] text-[var(--p-muted)]">
           Status Booking
         </p>
 
         {userBookings.length === 0 ? (
-          <p className="text-[11px] text-[var(--p-muted)]">
+          <p className="text-[13px] text-[var(--p-muted)]">
             Belum ada booking
           </p>
         ) : (
@@ -330,7 +330,7 @@ function UserMenuContent({
             {pendingBookings.length > 0 && (
               <div className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-yellow-500" />
-                <span className="text-[11px] text-[var(--p-muted)]">
+                <span className="text-[13px] text-[var(--p-muted)]">
                   {pendingBookings.length} Pending
                 </span>
               </div>
@@ -339,19 +339,19 @@ function UserMenuContent({
             {confirmedBookings.length > 0 && (
               <div className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-green-500" />
-                <span className="text-[11px] text-[var(--p-muted)]">
+                <span className="text-[13px] text-[var(--p-muted)]">
                   {confirmedBookings.length} Confirmed
                 </span>
               </div>
             )}
 
-            <div className="mt-3 space-y-1 text-[10px] text-[var(--p-muted)]">
+            <div className="mt-3 space-y-1 text-[12px] text-[var(--p-muted)]">
               {userBookings.slice(0, 3).map((booking) => (
                 <div key={booking.id} className="rounded bg-[var(--p-ultra)] px-2 py-1">
                   <p className="font-medium text-[var(--p-dark)]">
                     {booking.category.name}
                   </p>
-                  <p className="text-[9px] text-[var(--p-muted)]">
+                  <p className="text-[12px] text-[var(--p-muted)]">
                     {booking.schedule.dateLabel} - {booking.schedule.slot}
                   </p>
                 </div>
@@ -364,13 +364,13 @@ function UserMenuContent({
       <div className="space-y-2 px-4 py-3">
         <button
           onClick={onOpenDashboard}
-          className="w-full rounded px-3 py-2 text-left text-[11px] font-medium uppercase tracking-[1px] text-[var(--p-mid)] transition-colors hover:bg-[var(--p-ultra)]"
+          className="w-full rounded px-3 py-2 text-left text-[13px] font-medium uppercase tracking-[1px] text-[var(--p-mid)] transition-colors hover:bg-[var(--p-ultra)]"
         >
           Lihat Booking
         </button>
         <button
           onClick={onLogout}
-          className="flex w-full items-center gap-2 rounded px-3 py-2 text-[11px] font-medium uppercase tracking-[1px] text-red-600 transition-colors hover:bg-red-50"
+          className="flex w-full items-center gap-2 rounded px-3 py-2 text-[13px] font-medium uppercase tracking-[1px] text-red-600 transition-colors hover:bg-red-50"
         >
           <FiLogOut size={12} />
           Logout
