@@ -1,6 +1,15 @@
 // src/components/layout/Footer.jsx
-const navLinks  = ['Home', 'About', 'Gallery', 'Booking'];
-const contacts  = ['Instagram', 'WhatsApp', 'Email', 'TikTok'];
+const navLinks = ['Home', 'About', 'Gallery', 'Booking'];
+const contacts = [
+  {
+    label: 'Instagram',
+    href: 'https://www.instagram.com/rapunzl.art?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==',
+  },
+  {
+    label: 'TikTok',
+    href: 'https://www.tiktok.com/@rapunzll.0?is_from_webapp=1&sender_device=pc',
+  },
+];
 
 export default function Footer() {
   return (
@@ -31,8 +40,17 @@ export default function Footer() {
         <div>
           <h4 className="text-[9px] tracking-[3px] uppercase text-[var(--p)] mb-3.5">Kontak</h4>
           <ul className="list-none space-y-2">
-            {contacts.map((c) => (
-              <li key={c} className="text-[11px] text-[rgba(245,208,223,0.45)] cursor-pointer hover:text-[var(--p-light)] transition-colors">{c}</li>
+            {contacts.map((contact) => (
+              <li key={contact.label}>
+                <a
+                  href={contact.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[11px] text-[rgba(245,208,223,0.45)] transition-colors hover:text-[var(--p-light)]"
+                >
+                  {contact.label}
+                </a>
+              </li>
             ))}
           </ul>
         </div>
