@@ -1,12 +1,12 @@
 // src/components/layout/Navbar.jsx
 import { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
 import { FiChevronDown, FiLogOut, FiMenu, FiX } from 'react-icons/fi';
-import Button from '../ui/Button';
-import { getHennaCategorySlug } from '../../data/hennaCategories';
-import { useCompanyProfile } from '../../hooks/useCompanyProfile';
-import { useAuth } from '../../hooks/useAuth';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { getAdminBookings } from '../../data/bookingConfig';
+import { getHennaCategorySlug } from '../../data/hennaCategories';
+import { useAuth } from '../../hooks/useAuth';
+import { useCompanyProfile } from '../../hooks/useCompanyProfile';
+import Button from '../ui/Button';
 
 const navItems = [
   { label: 'Home', to: '/' },
@@ -85,10 +85,15 @@ export default function Navbar() {
         <button
           type="button"
           onClick={() => handleNavigate('/')}
-          className="shrink-0 text-left font-serif text-[19px] font-light tracking-[3px] text-[var(--p-mid)] md:text-[21px]"
+          className="flex shrink-0 items-center"
           aria-label="Ke halaman home"
         >
-          RPNZL <span className="text-[var(--p)]">Art</span>
+          <img
+            src="/rapunzl-logo.svg"
+            alt=""
+            aria-hidden="true"
+            className="h-8 w-auto md:h-9"
+          />
         </button>
 
         <ul className="hidden list-none gap-7 md:flex">
