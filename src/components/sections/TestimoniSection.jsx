@@ -1,10 +1,10 @@
 // src/components/sections/TestimoniSection.jsx
 import { useEffect, useMemo, useState } from 'react';
 import { FiStar } from 'react-icons/fi';
+import { fetchTestimonials } from '../../lib/testimonialsApi';
 import TestimonialFormModal from '../testimonials/TestimonialFormModal';
 import RevealSection from '../ui/RevealSection';
 import SectionTitle from '../ui/SectionTitle';
-import { fetchTestimonials } from '../../lib/testimonialsApi';
 
 function RatingStars({ rating }) {
   return (
@@ -96,7 +96,7 @@ export default function TestimoniSection() {
         <SectionTitle
           label="Testimonials"
           title="Apa Kata Mereka"
-          subtitle="Cerita pelanggan setelah mencoba layanan henna RPNZL Art."
+          subtitle="Cerita pelanggan setelah mencoba layanan henna RAPUNZL Art."
           center
         />
 

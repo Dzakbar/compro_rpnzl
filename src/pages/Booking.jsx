@@ -11,7 +11,7 @@ import { getCompanyProfileCategory, useCompanyProfile } from '../hooks/useCompan
 import { getApiBaseUrl } from '../lib/apiBaseUrl';
 import { loginCustomer, loginGoogleCustomer, registerCustomer } from '../lib/authApi';
 import { fetchTestimonials } from '../lib/testimonialsApi';
-import { createOwnerWhatsAppUrl } from '../data/bookingConfig';
+import { createOwnerWhatsAppUrlFromApi } from '../data/bookingConfig';
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -672,7 +672,7 @@ export default function Booking() {
       
       // Build WhatsApp message and open immediately
       const fallbackMessage = buildWhatsAppMessage(booking);
-      const waUrl = data.wa_url || createOwnerWhatsAppUrl(fallbackMessage);
+      const waUrl = createOwnerWhatsAppUrlFromApi(data.wa_url, fallbackMessage);
       setTimeout(() => {
         window.open(waUrl, '_blank', 'noopener,noreferrer');
       }, 1000);

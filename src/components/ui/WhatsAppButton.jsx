@@ -1,9 +1,9 @@
 // src/components/ui/WhatsAppButton.jsx
 import { FaWhatsapp } from 'react-icons/fa';
+import { createWhatsAppUrl, SUPPORT_WHATSAPP_NUMBER } from '../../data/bookingConfig';
 
 export default function WhatsAppButton() {
-  const phoneNumber = '6288140625940';
-  const whatsappUrl = `https://wa.me/${phoneNumber}`;
+  const whatsappUrl = createWhatsAppUrl(SUPPORT_WHATSAPP_NUMBER);
 
   return (
     <a
