@@ -1,12 +1,14 @@
 // src/components/layout/Navbar.jsx
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FiChevronDown, FiLogOut, FiMenu, FiX } from 'react-icons/fi';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { getAdminBookings } from '../../data/bookingConfig';
 import { getHennaCategorySlug } from '../../data/hennaCategories';
-import { useAuth } from '../../hooks/useAuth';
+import { BOOKINGS_CHANGE_EVENT, useAuth } from '../../hooks/useAuth';
 import { useCompanyProfile } from '../../hooks/useCompanyProfile';
+import { getApiBaseUrl } from '../../lib/apiBaseUrl';
 import Button from '../ui/Button';
+
+const API_BASE_URL = getApiBaseUrl();
 
 const navItems = [
   { label: 'Home', to: '/' },
@@ -38,18 +40,60 @@ export default function Navbar() {
   const { categories } = useCompanyProfile();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [userBookings, setUserBookings] = useState([]);
+  const [isBookingsLoading, setIsBookingsLoading] = useState(false);
+  const userEmail = user?.email || '';
 
-  const getUserBookings = () => {
-    if (!user) return [];
-    const allBookings = getAdminBookings();
-    return allBookings.filter((booking) => (
-      booking.customer?.whatsapp === user.phone || booking.customer?.email === user.email
-    ));
-  };
+  const fetchUserBookings = useCallback(async () => {
+    if (!isAuthenticated || !userEmail) {
+      setUserBookings([]);
+      setIsBookingsLoading(false);
+      return;
+    }
 
-  const userBookings = getUserBookings();
+    setIsBookingsLoading(true);
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/user/bookings?email=${encodeURIComponent(userEmail)}`,
+        { headers: { Accept: 'application/json' } },
+      );
+
+      if (!response.ok) {
+        setUserBookings([]);
+        return;
+      }
+
+      const data = await response.json();
+      setUserBookings(data.bookings || []);
+    } catch (error) {
+      console.error('Failed to fetch user bookings:', error);
+      setUserBookings([]);
+    } finally {
+      setIsBookingsLoading(false);
+    }
+  }, [isAuthenticated, userEmail]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      fetchUserBookings();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [fetchUserBookings]);
+
+  useEffect(() => {
+    window.addEventListener(BOOKINGS_CHANGE_EVENT, fetchUserBookings);
+
+    return () => {
+      window.removeEventListener(BOOKINGS_CHANGE_EVENT, fetchUserBookings);
+    };
+  }, [fetchUserBookings]);
+
   const pendingBookings = userBookings.filter((booking) => booking.status === 'pending');
   const confirmedBookings = userBookings.filter((booking) => booking.status === 'confirmed');
+  const completedBookings = userBookings.filter((booking) => booking.status === 'done');
+  const rejectedBookings = userBookings.filter((booking) => booking.status === 'rejected');
 
   const handleLogout = () => {
     logout();
@@ -153,7 +197,15 @@ export default function Navbar() {
 
               <button
                 type="button"
-                onClick={() => setShowUserMenu((current) => !current)}
+                onClick={() => {
+                  const nextValue = !showUserMenu;
+
+                  setShowUserMenu(nextValue);
+
+                  if (nextValue) {
+                    fetchUserBookings();
+                  }
+                }}
                 className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--p)] text-[var(--p-mid)] transition-colors hover:bg-[var(--p-light)]"
                 aria-label="Buka menu user"
                 aria-expanded={showUserMenu}
@@ -169,6 +221,9 @@ export default function Navbar() {
                     userBookings={userBookings}
                     pendingBookings={pendingBookings}
                     confirmedBookings={confirmedBookings}
+                    completedBookings={completedBookings}
+                    rejectedBookings={rejectedBookings}
+                    isBookingsLoading={isBookingsLoading}
                     onOpenDashboard={handleOpenUserDashboard}
                     onLogout={handleLogout}
                   />
@@ -299,6 +354,9 @@ function UserMenuContent({
   userBookings,
   pendingBookings,
   confirmedBookings,
+  completedBookings,
+  rejectedBookings,
+  isBookingsLoading,
   onOpenDashboard,
   onLogout,
 }) {
@@ -321,7 +379,11 @@ function UserMenuContent({
           Status Booking
         </p>
 
-        {userBookings.length === 0 ? (
+        {isBookingsLoading ? (
+          <p className="text-[13px] text-[var(--p-muted)]">
+            Memuat status booking...
+          </p>
+        ) : userBookings.length === 0 ? (
           <p className="text-[13px] text-[var(--p-muted)]">
             Belum ada booking
           </p>
@@ -331,7 +393,7 @@ function UserMenuContent({
               <div className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-yellow-500" />
                 <span className="text-[13px] text-[var(--p-muted)]">
-                  {pendingBookings.length} Pending
+                  {pendingBookings.length} Menunggu konfirmasi
                 </span>
               </div>
             )}
@@ -340,7 +402,25 @@ function UserMenuContent({
               <div className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-green-500" />
                 <span className="text-[13px] text-[var(--p-muted)]">
-                  {confirmedBookings.length} Confirmed
+                  {confirmedBookings.length} Dikonfirmasi
+                </span>
+              </div>
+            )}
+
+            {completedBookings.length > 0 && (
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-blue-500" />
+                <span className="text-[13px] text-[var(--p-muted)]">
+                  {completedBookings.length} Selesai
+                </span>
+              </div>
+            )}
+
+            {rejectedBookings.length > 0 && (
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-red-500" />
+                <span className="text-[13px] text-[var(--p-muted)]">
+                  {rejectedBookings.length} Ditolak
                 </span>
               </div>
             )}
@@ -349,10 +429,10 @@ function UserMenuContent({
               {userBookings.slice(0, 3).map((booking) => (
                 <div key={booking.id} className="rounded bg-[var(--p-ultra)] px-2 py-1">
                   <p className="font-medium text-[var(--p-dark)]">
-                    {booking.category.name}
+                    {booking.package_name || booking.category?.name || 'Booking'}
                   </p>
                   <p className="text-[12px] text-[var(--p-muted)]">
-                    {booking.schedule.dateLabel} - {booking.schedule.slot}
+                    {booking.booking_date || booking.schedule?.dateLabel || '-'} - {booking.booking_time || booking.schedule?.slot || '-'}
                   </p>
                 </div>
               ))}

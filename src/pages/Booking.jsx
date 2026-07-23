@@ -6,12 +6,12 @@ import { FiCalendar, FiLock, FiMail, FiPhone, FiStar, FiUser, FiX } from 'react-
 import { useSearchParams } from 'react-router-dom';
 import AvailabilityCalendar from '../components/sections/AvailabilityCalendar';
 import TestimonialFormModal from '../components/testimonials/TestimonialFormModal';
-import { notifyAuthChanged } from '../hooks/useAuth';
+import { notifyAuthChanged, notifyBookingsChanged } from '../hooks/useAuth';
 import { getCompanyProfileCategory, useCompanyProfile } from '../hooks/useCompanyProfile';
 import { getApiBaseUrl } from '../lib/apiBaseUrl';
 import { loginCustomer, loginGoogleCustomer, registerCustomer } from '../lib/authApi';
 import { fetchTestimonials } from '../lib/testimonialsApi';
-import { createOwnerWhatsAppUrlFromApi } from '../data/bookingConfig';
+import { createOwnerWhatsAppUrl } from '../data/bookingConfig';
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -552,12 +552,12 @@ export default function Booking() {
     }
 
     // Validate required fields
-    if (!form.name) {
+    if (!form.name.trim()) {
       setSubmitStatus('Masukkan nama Anda.');
       return;
     }
 
-    if (!form.whatsapp) {
+    if (!form.whatsapp.trim()) {
       setSubmitStatus('Masukkan nomor WhatsApp Anda.');
       return;
     }
@@ -585,6 +585,9 @@ export default function Booking() {
     }
 
     try {
+      const customerName = form.name.trim();
+      const customerWhatsapp = form.whatsapp.trim();
+
       // Extract time from selectedSlot.time (format: "10:00")
       const bookingTime = selectedSlot.time;
       
@@ -597,8 +600,8 @@ export default function Booking() {
         location: form.location,
         customization_notes: form.notes || null,
         customer: {
-          name: form.name,
-          whatsapp_number: form.whatsapp,
+          name: customerName,
+          whatsapp_number: customerWhatsapp,
           email: userEmail,
         },
       };
@@ -643,8 +646,8 @@ export default function Booking() {
           slot: selectedSlot.time,
         },
         customer: {
-          name: form.name,
-          whatsapp: form.whatsapp,
+          name: customerName,
+          whatsapp: customerWhatsapp,
           eventType: form.eventType,
           location: form.location,
           notes: form.notes,
@@ -656,9 +659,9 @@ export default function Booking() {
         packageId: category.packageId,
         packageName: category.name,
         customer: {
-          name: form.name,
+          name: customerName,
           email: userEmail,
-          whatsapp_number: form.whatsapp,
+          whatsapp_number: customerWhatsapp,
         },
       };
 
@@ -669,10 +672,11 @@ export default function Booking() {
       setSubmitStatus(
         'Booking berhasil dikirim! Detail bookingmu sudah kami terima. Silakan lanjutkan konfirmasi melalui WhatsApp.',
       );
+      notifyBookingsChanged();
       
       // Build WhatsApp message and open immediately
       const fallbackMessage = buildWhatsAppMessage(booking);
-      const waUrl = createOwnerWhatsAppUrlFromApi(data.wa_url, fallbackMessage);
+      const waUrl = createOwnerWhatsAppUrl(fallbackMessage);
       setTimeout(() => {
         window.open(waUrl, '_blank', 'noopener,noreferrer');
       }, 1000);

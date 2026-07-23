@@ -1,9 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 
 export const AUTH_CHANGE_EVENT = 'rpnzl-auth-change';
+export const BOOKINGS_CHANGE_EVENT = 'rpnzl-bookings-change';
 
 export function notifyAuthChanged() {
   window.dispatchEvent(new Event(AUTH_CHANGE_EVENT));
+}
+
+export function notifyBookingsChanged() {
+  window.dispatchEvent(new Event(BOOKINGS_CHANGE_EVENT));
 }
 
 function readStoredUser() {
