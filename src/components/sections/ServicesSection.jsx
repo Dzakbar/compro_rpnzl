@@ -17,11 +17,11 @@ export default function ServicesSection() {
   return (
     <section className="bg-[var(--p-ultra)] px-5 py-14 md:px-10 md:py-[72px]">
       <RevealSection>
-        <SectionTitle label="Layanan kami" title="Pilih paket<br>yang sesuai" center />
+        <SectionTitle label="Layanan kami" title="Pilih warna<br>yang sesuai" center />
       </RevealSection>
 
       <motion.div
-        className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-9"
+        className="grid grid-cols-1 gap-4 mt-9 sm:grid-cols-2 lg:grid-cols-4"
         variants={stagger}
         initial="hidden"
         whileInView="show"

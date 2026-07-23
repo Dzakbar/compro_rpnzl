@@ -66,7 +66,7 @@ function buildWhatsAppMessage(booking) {
     'Halo RPNZL Art, saya ingin booking henna.',
     '',
     `Booking ID: ${booking.id}`,
-    `Kategori: ${booking.category.name}`,
+    `Warna Henna: ${booking.category.name}`,
     `Harga: ${booking.category.price}`,
     `Tanggal: ${booking.schedule.dateLabel}`,
     `Jam: ${booking.schedule.slot}`,
@@ -775,7 +775,7 @@ export default function Booking() {
 
             <div className="mt-7 border-y border-[var(--p-border)] py-5">
               <p className="text-[15px] font-semibold uppercase tracking-[1px] text-[var(--p-mid)]">
-                Paket
+                Warna Henna
               </p>
               <div className="mt-3 flex items-start gap-3">
                 <span
